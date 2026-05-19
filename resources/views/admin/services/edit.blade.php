@@ -40,4 +40,8 @@
         </div>
     </form>
 </div>
+@php
+    // Form nay dung de cap nhat lai cac thong tin thay doi cua dich vu nhu ten, don gia hoac trang thai kich hoat
+@endphp
+
 @endsection

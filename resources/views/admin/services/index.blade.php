@@ -62,4 +62,8 @@
         </tbody>
     </table>
 </div>
+@php
+    // Day la file danh sach hien thi toan bo cac dich vu thanh phan trong he thong, ho tro sua va xoa nhanh
+@endphp
+
 @endsection

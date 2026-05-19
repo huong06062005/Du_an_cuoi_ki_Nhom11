@@ -24,7 +24,6 @@ class ComboManageController extends Controller
      */
     public function create()
     {
-        // Lấy tất cả dịch vụ thành phần để admin chọn
         $services = Service::all(); 
         return view('admin.combos.create', compact('services'));
     }

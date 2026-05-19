@@ -49,3 +49,8 @@
     </form>
 </div>
 @endsection
+@php
+    // Day la form dang ky cac dich vu don le nhu khach san, ve may bay de tích hop vao combo du lich sau nay
+@endphp
+
+@endsection

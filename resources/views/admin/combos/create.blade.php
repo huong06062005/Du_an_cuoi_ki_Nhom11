@@ -57,7 +57,7 @@
                 @error('mo_ta') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
             </div>
         </div>
-        
+
         <div class="pt-6 border-t border-slate-100 flex justify-end">
             <button type="submit" class="w-full md:w-auto bg-blue-600 hover:bg-blue-700 text-white px-10 py-3.5 rounded-xl font-bold shadow-lg shadow-blue-200 transition-all uppercase tracking-widest text-sm">
                 <i class="fas fa-save mr-2"></i> Xác nhận lưu hệ thống

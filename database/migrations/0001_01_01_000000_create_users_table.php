@@ -1,9 +1,17 @@
 <?php
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 07034701dd947503259907c5bbd43a1d157a1e25
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 07034701dd947503259907c5bbd43a1d157a1e25
 return new class extends Migration
 {
     /**
@@ -21,12 +29,20 @@ return new class extends Migration
             $table->timestamps();
         });
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 07034701dd947503259907c5bbd43a1d157a1e25
         Schema::create('password_reset_tokens', function (Blueprint $table) {
             $table->string('email')->primary();
             $table->string('token');
             $table->timestamp('created_at')->nullable();
         });
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 07034701dd947503259907c5bbd43a1d157a1e25
         Schema::create('sessions', function (Blueprint $table) {
             $table->string('id')->primary();
             $table->foreignId('user_id')->nullable()->index();
@@ -37,6 +53,10 @@ return new class extends Migration
         });
     }
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 07034701dd947503259907c5bbd43a1d157a1e25
     /**
      * Reverse the migrations.
      */

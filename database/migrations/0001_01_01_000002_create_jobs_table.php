@@ -1,9 +1,17 @@
 <?php
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 07034701dd947503259907c5bbd43a1d157a1e25
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 07034701dd947503259907c5bbd43a1d157a1e25
 return new class extends Migration
 {
     /**
@@ -21,6 +29,10 @@ return new class extends Migration
             $table->unsignedInteger('created_at');
         });
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 07034701dd947503259907c5bbd43a1d157a1e25
         Schema::create('job_batches', function (Blueprint $table) {
             $table->string('id')->primary();
             $table->string('name');
@@ -34,6 +46,10 @@ return new class extends Migration
             $table->integer('finished_at')->nullable();
         });
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 07034701dd947503259907c5bbd43a1d157a1e25
         Schema::create('failed_jobs', function (Blueprint $table) {
             $table->id();
             $table->string('uuid')->unique();
@@ -43,10 +59,18 @@ return new class extends Migration
             $table->longText('exception');
             $table->timestamp('failed_at')->useCurrent();
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 07034701dd947503259907c5bbd43a1d157a1e25
             $table->index(['connection', 'queue', 'failed_at']);
         });
     }
 
+<<<<<<< HEAD
+=======
+
+>>>>>>> 07034701dd947503259907c5bbd43a1d157a1e25
     /**
      * Reverse the migrations.
      */

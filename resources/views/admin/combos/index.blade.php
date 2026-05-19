@@ -1,5 +1,5 @@
 @extends('admin.layouts.admin') 
-@section('title', 'QUẢN LÝ COMBO') {{-- Đổi admin_title thành title cho khớp với file layout --}}
+@section('title', 'QUẢN LÝ COMBO') {{-- Đổi admin_title thành title cho khớp với file layout -}}
 
 @section('admin_content')
 <div class="flex justify-between items-center mb-6">

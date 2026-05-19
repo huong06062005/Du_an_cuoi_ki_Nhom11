@@ -1,5 +1,4 @@
-@extends('admin.layouts.admin') {{-- Thêm chữ "s" vào layouts để đúng với thư mục của em --}}
-
+@extends('admin.layouts.admin') 
 @section('title', 'QUẢN LÝ COMBO') {{-- Đổi admin_title thành title cho khớp với file layout --}}
 
 @section('admin_content')

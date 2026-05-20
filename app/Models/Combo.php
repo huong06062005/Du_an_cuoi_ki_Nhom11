@@ -4,55 +4,54 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Storage;
 
 class Combo extends Model
 {
     use HasFactory;
 
-    /**
-     * Khai báo tên bảng trong Database
-     */
     protected $table = 'combos';
 
     /**
-     * Mở khóa nạp mảng bảo mật để đón nhận dữ liệu tự động từ Controller.
+     * Mở khóa tất cả các trường để nhận dữ liệu từ Controller.
      */
     protected $guarded = [];
 
     /**
-     * Accessor thông minh: Tự động chuẩn hóa Link ảnh đại diện.
-     * Giúp hiển thị mượt mà cả ảnh upload local lẫn link ảnh tuyệt đối từ internet.
+     * Tự động thêm các thuộc tính ảo vào kết quả JSON/Array.
+     */
+    protected $appends = ['image_url', 'mo_ta_text'];
+
+    /**
+     * Accessor: Tự động chuẩn hóa Link ảnh đại diện.
      */
     public function getImageUrlAttribute()
     {
-        // Lấy đường dẫn từ cột 'image' hoặc cột 'hinh_anh' tùy theo cấu trúc database
         $path = $this->image ?? $this->hinh_anh;
 
         if (empty($path)) {
-            // Nếu không có ảnh, trả về ảnh mặc định
-            return 'https://ui-avatars.com/api/?name=Combo&background=random&color=fff';
+            return asset('images/default-combo.jpg'); // Nên có ảnh mặc định trong thư mục public/images
         }
 
-        // Kiểm tra nếu là link ảnh đầy đủ từ internet
+        // Nếu là link http/https thì trả về nguyên bản
         if (filter_var($path, FILTER_VALIDATE_URL)) {
             return $path;
         }
 
-        // Nếu là ảnh upload lưu trong thư mục storage local
+        // Nếu là file upload thì trả về đường dẫn Storage
         return asset('storage/' . $path);
     }
 
     /**
-     * Accessor bổ trợ: Tự động đồng bộ trường mô tả dữ liệu
+     * Accessor: Tự động đồng bộ trường mô tả.
      */
     public function getMoTaTextAttribute()
     {
-        return $this->mo_ta ?? $this->description ?? '';
+        return $this->mo_ta ?? $this->description ?? 'Đang cập nhật...';
     }
 
     /**
-     * Quan hệ với các Dịch vụ thành phần (Many-to-Many)
-     * Một combo gồm nhiều dịch vụ kết nối qua bảng trung gian combo_service
+     * Quan hệ Many-to-Many với Dịch vụ.
      */
     public function services()
     {
@@ -60,8 +59,7 @@ class Combo extends Model
     }
 
     /**
-     * Quan hệ với Đơn đặt hàng (Booking)
-     * Một combo có thể được đặt bởi nhiều khách hàng khác nhau
+     * Quan hệ với Đơn đặt hàng.
      */
     public function bookings()
     {

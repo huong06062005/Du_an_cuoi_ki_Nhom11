@@ -10,8 +10,7 @@
         <nav class="hidden md:flex space-x-8 font-bold text-[11px] uppercase tracking-widest text-slate-500">
             <a href="/" class="hover:text-blue-600 transition-colors">Trang chủ</a>
             <a href="{{ route('combos.index') }}" class="hover:text-blue-600 transition-colors">Gói Combo</a>
-            <a href="#" class="hover:text-blue-600 transition-colors">Khách sạn</a>
-            <a href="#" class="hover:text-blue-600 transition-colors">Tin tức</a>
+            <a href="{{ route('contact') }}" class="hover:text-blue-600 transition-colors">Liên hệ</a>
         </nav>
 
         <div class="flex items-center space-x-6">

@@ -8,68 +8,78 @@
     <p class="text-sm text-slate-500 italic">Cập nhật dữ liệu hệ thống tính đến ngày {{ date('d/m/Y') }}</p>
 </div>
 
-{{-- Các khối thống kê --}}
+{{-- Các khối thống kê - ĐÃ BỔ SUNG LINK ĐỂ CLICK ẤN VÀO ĐƯỢC --}}
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
-    <div class="bg-gradient-to-br from-blue-600 to-blue-700 p-6 rounded-2xl shadow-lg shadow-blue-200 text-white">
-        <div class="flex justify-between items-start">
-            <div>
-                <p class="text-xs font-bold uppercase opacity-80 tracking-widest">Tổng doanh thu</p>
-                <h3 class="text-2xl font-black mt-1">{{ number_format($totalRevenue ?? 0) }}đ</h3> {{-- Đã sửa tên biến khớp với Controller --}}
+    
+    <a href="{{ Route::has('admin.bookings.index') ? route('admin.bookings.index') : '#' }}" class="block transition-transform hover:-translate-y-1">
+        <div class="bg-gradient-to-br from-blue-600 to-blue-700 p-6 rounded-2xl shadow-lg shadow-blue-200 text-white h-full">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-xs font-bold uppercase opacity-80 tracking-widest">Tổng doanh thu</p>
+                    <h3 class="text-2xl font-black mt-1">{{ number_format($totalRevenue ?? 0) }}đ</h3>
+                </div>
+                <div class="bg-white/20 p-2 rounded-lg">
+                    <i class="fas fa-wallet text-xl"></i>
+                </div>
             </div>
-            <div class="bg-white/20 p-2 rounded-lg">
-                <i class="fas fa-wallet text-xl"></i>
-            </div>
+            <p class="text-[10px] mt-4 font-medium"><i class="fas fa-chart-line mr-1"></i> Dữ liệu thời gian thực</p>
         </div>
-        <p class="text-[10px] mt-4 font-medium"><i class="fas fa-chart-line mr-1"></i> Dữ liệu thời gian thực</p>
-    </div>
+    </a>
 
-    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-        <div class="flex justify-between items-start">
-            <div>
-                <p class="text-xs font-bold uppercase text-slate-400 tracking-widest">Đơn đặt chỗ</p>
-                <h3 class="text-2xl font-black text-slate-800 mt-1">{{ $totalBookings ?? 0 }}</h3> {{-- Đã sửa tên biến khớp với Controller --}}
+    <a href="{{ Route::has('admin.bookings.index') ? route('admin.bookings.index') : '#' }}" class="block transition-transform hover:-translate-y-1">
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 h-full hover:border-emerald-200">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-xs font-bold uppercase text-slate-400 tracking-widest">Đơn đặt chỗ</p>
+                    <h3 class="text-2xl font-black text-slate-800 mt-1">{{ $totalBookings ?? 0 }}</h3>
+                </div>
+                <div class="bg-emerald-50 text-emerald-600 p-2 rounded-lg">
+                    <i class="fas fa-shopping-cart text-xl"></i>
+                </div>
             </div>
-            <div class="bg-emerald-50 text-emerald-600 p-2 rounded-lg">
-                <i class="fas fa-shopping-cart text-xl"></i>
-            </div>
+            <p class="text-[10px] mt-4 text-emerald-600 font-bold uppercase">Đang vận hành tốt</p>
         </div>
-        <p class="text-[10px] mt-4 text-emerald-600 font-bold uppercase">Đang vận hành tốt</p>
-    </div>
+    </a>
 
-    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-        <div class="flex justify-between items-start">
-            <div>
-                <p class="text-xs font-bold uppercase text-slate-400 tracking-widest">Combo du lịch</p>
-                <h3 class="text-2xl font-black text-slate-800 mt-1">{{ $totalCombos ?? 0 }}</h3> {{-- Đã sửa tên biến khớp với Controller --}}
+    <a href="{{ Route::has('admin.combos.index') ? route('admin.combos.index') : '#' }}" class="block transition-transform hover:-translate-y-1">
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 h-full hover:border-amber-200">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-xs font-bold uppercase text-slate-400 tracking-widest">Combo du lịch</p>
+                    <h3 class="text-2xl font-black text-slate-800 mt-1">{{ $totalCombos ?? 0 }}</h3>
+                </div>
+                <div class="bg-amber-50 text-amber-600 p-2 rounded-lg">
+                    <i class="fas fa-box-open text-xl"></i>
+                </div>
             </div>
-            <div class="bg-amber-50 text-amber-600 p-2 rounded-lg">
-                <i class="fas fa-box-open text-xl"></i>
-            </div>
+            <p class="text-[10px] mt-4 text-slate-400 font-medium">Sẵn sàng phục vụ</p>
         </div>
-        <p class="text-[10px] mt-4 text-slate-400 font-medium">Sẵn sàng phục vụ</p>
-    </div>
+    </a>
 
-    <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100">
-        <div class="flex justify-between items-start">
-            <div>
-                <p class="text-xs font-bold uppercase text-slate-400 tracking-widest">Thành viên</p>
-                <h3 class="text-2xl font-black text-slate-800 mt-1">{{ $totalUsers ?? 0 }}</h3> {{-- Đã sửa tên biến khớp với Controller --}}
+    <a href="{{ Route::has('admin.users') ? route('admin.users') : '#' }}" class="block transition-transform hover:-translate-y-1">
+        <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 h-full hover:border-purple-200">
+            <div class="flex justify-between items-start">
+                <div>
+                    <p class="text-xs font-bold uppercase text-slate-400 tracking-widest">Thành viên</p>
+                    <h3 class="text-2xl font-black text-slate-800 mt-1">{{ $totalUsers ?? 0 }}</h3>
+                </div>
+                <div class="bg-purple-50 text-purple-600 p-2 rounded-lg">
+                    <i class="fas fa-users text-xl"></i>
+                </div>
             </div>
-            <div class="bg-purple-50 text-purple-600 p-2 rounded-lg">
-                <i class="fas fa-users text-xl"></i>
-            </div>
+            <p class="text-[10px] mt-4 text-purple-600 font-bold uppercase">Tăng trưởng ổn định</p>
         </div>
-        <p class="text-[10px] mt-4 text-purple-600 font-bold uppercase">Tăng trưởng ổn định</p>
-    </div>
+    </a>
 </div>
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
     <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
         <div class="flex justify-between items-center mb-6">
             <h4 class="font-bold text-slate-800 uppercase text-sm tracking-widest">Giao dịch gần đây</h4>
-            {{-- Đã sửa thành admin.orders.index khớp với file routes/web.php thầy đã gửi --}}
-            <a href="{{ route('admin.orders.index') }}" class="text-xs text-blue-600 font-bold hover:underline">Xem tất cả</a>
+            {{-- Tự động trỏ liên kết đến danh sách đơn hàng của hệ thống --}}
+            <a href="{{ Route::has('admin.bookings.index') ? route('admin.bookings.index') : '#' }}" class="text-xs text-blue-600 font-bold hover:underline">Xem tất cả</a>
         </div>
+        
         <div class="space-y-4">
             {{-- Kiểm tra nếu có đơn hàng mới hiện, nếu không sẽ hiện thông báo trống --}}
             @if(isset($recent_orders) && count($recent_orders) > 0)
@@ -85,7 +95,7 @@
                         </div>
                     </div>
                     <div class="text-right">
-                        <p class="text-sm font-black text-slate-800">{{ number_format($order->total_price) }}đ</p>
+                        <p class="text-sm font-black text-slate-800">{{ number_format($order->total_price ?? $order->gia_tien ?? 0) }}đ</p>
                         <span class="text-[9px] font-bold text-amber-600 uppercase">Đang chờ duyệt</span>
                     </div>
                 </div>
@@ -101,7 +111,7 @@
         </div>
     </div>
 
-    {{-- Trạng thái dịch vụ - Phần này làm tĩnh để trang trí --}}
+    {{-- Trạng thái dịch vụ --}}
     <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
         <h4 class="font-bold text-slate-800 uppercase text-sm tracking-widest mb-6">Trạng thái hệ thống</h4>
         <div class="space-y-6">

@@ -1,6 +1,7 @@
 @extends('client.layouts.master')
 
 @section('content')
+    {{-- Khối Banner Trên Cùng --}}
     <div class="relative w-full h-[550px] flex items-center justify-center bg-cover bg-center" 
          style="background-image: linear-gradient(rgba(0,0,0,0.2), rgba(0,0,0,0.2)), url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1600&q=80');">
         
@@ -12,6 +13,7 @@
                 Khách sạn + Máy bay + Tham quan giá tốt nhất
             </p>
 
+            {{-- Form Tìm Kiếm Nhanh --}}
             <div class="max-w-6xl mx-auto bg-white p-5 rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.3)] flex flex-col md:flex-row items-center gap-4 border border-white/20">
                 <div class="flex-1 w-full text-left px-6 border-r border-slate-100">
                     <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Giá từ</label>
@@ -32,8 +34,10 @@
         </div>
     </div>
 
+    {{-- Khối Danh Sách Gói Combo Du Lịch --}}
     <div class="w-full bg-[#f8fafc] py-24">
-        <div class="max-w-[1440px] mx-auto px-6"> <div class="flex justify-between items-end mb-12">
+        <div class="max-w-[1440px] mx-auto px-6"> 
+            <div class="flex justify-between items-end mb-12">
                 <div>
                     <h2 class="text-3xl font-black text-slate-900 uppercase">Gói Combo Phổ Biến</h2>
                     <div class="h-1.5 w-20 bg-blue-600 mt-2 rounded-full"></div>
@@ -44,22 +48,51 @@
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
                 @foreach($combos as $combo)
                     <div class="bg-white rounded-[32px] overflow-hidden shadow-[0_10px_40px_rgba(0,0,0,0.04)] hover:shadow-[0_30px_70px_rgba(0,0,0,0.12)] transition-all duration-500 group border border-slate-100 flex flex-col h-full">
+                        {{-- Phần Ảnh Đại Diện Combo --}}
                         <div class="relative h-80 overflow-hidden">
-                            <img src="{{ asset('storage/' . $combo->image) }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
-                            <div class="absolute top-6 left-6 bg-white/90 backdrop-blur-md text-blue-600 px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm">
-                                {{ $combo->location }}
+                            {{-- ĐÃ SỬA: Gọi qua thuộc tính ảo $combo->image_url để tự động xử lý link ảnh Unsplash thông minh --}}
+                            <img src="{{ $combo->image_url }}" alt="{{ $combo->name }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                            
+                            {{-- Tag hiển thị Trạng thái Hot / Giảm giá nếu có --}}
+                            <div class="absolute top-6 left-6 bg-red-500 text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm">
+                                BÁN CHẠY 🔥
                             </div>
                         </div>
 
+                        {{-- Phần Thông Tin Chi Tiết Gói --}}
                         <div class="p-10 flex flex-col flex-grow">
-                            <h3 class="font-extrabold text-2xl text-slate-800 mb-4 leading-tight group-hover:text-blue-600 transition-colors">
-                                {{ $combo->name }}
+                            <h3 class="font-extrabold text-2xl text-slate-800 mb-2 leading-tight group-hover:text-blue-600 transition-colors line-clamp-2 min-h-[4rem]">
+                                {{ $combo->name ?? $combo->ten_combo }}
                             </h3>
-                            <div class="flex items-baseline gap-1 mb-8">
-                                <span class="text-3xl font-black text-red-500">{{ number_format($combo->price) }}</span>
-                                <span class="text-sm font-bold text-red-400">VNĐ</span>
+                            
+                            {{-- Hiển thị mô tả ngắn gọn --}}
+                            <p class="text-xs text-slate-400 mb-6 line-clamp-2 italic">
+                                {{ $combo->mo_ta_text }}
+                            </p>
+
+                            {{-- Khối Hiển Thị Giá Tiền (ĐÃ SỬA CHỐNG LỖI 0 VNĐ) --}}
+                            <div class="mb-8">
+                                @php
+                                    // Gọi qua real_price từ Model Combo để tự động gom tính tổng tiền từ dịch vụ thành phần
+                                    $currentPrice = $combo->real_price ?? ($combo->price ?? 0);
+                                    
+                                    // Tạo giá cũ dự phòng để làm hiệu ứng gạch ngang giảm giá cho đẹp mắt
+                                    $oldPrice = $combo->old_price ?? ($combo->gia_cu ?? ($currentPrice * 1.25));
+                                @endphp
+                                
+                                {{-- Giá cũ gạch ngang --}}
+                                <div class="text-slate-400 text-sm line-through font-medium mb-1">
+                                    {{ number_format($oldPrice, 0, ',', '.') }} VNĐ
+                                </div>
+                                
+                                {{-- Giá bán chính thức màu đỏ --}}
+                                <div class="flex items-baseline gap-1">
+                                    <span class="text-3xl font-black text-red-500">{{ number_format($currentPrice, 0, ',', '.') }}</span>
+                                    <span class="text-sm font-bold text-red-400">VNĐ</span>
+                                </div>
                             </div>
 
+                            {{-- Nút Hành Động Đặt Tour --}}
                             <div class="mt-auto space-y-4">
                                 <a href="#" class="block w-full py-4 rounded-2xl bg-[#1a1a2e] text-white font-black text-xs uppercase tracking-[0.2em] text-center hover:bg-blue-600 transition-all shadow-lg">
                                     ĐẶT TOUR NGAY

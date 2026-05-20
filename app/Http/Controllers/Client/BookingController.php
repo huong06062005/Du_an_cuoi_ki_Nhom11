@@ -3,62 +3,71 @@
 namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
-use App\Models\Combo;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB; 
+use App\Models\Booking; // Model quản lý đơn đặt
+use App\Models\Combo;   // Model combo để lấy thông tin giá
+use Illuminate\Support\Facades\Auth;
 
 class BookingController extends Controller
 {
     /**
-     * 1. Hàm hiển thị Form điền thông tin đặt Combo
+     * Hiển thị form đặt combo
      */
     public function create($combo_id)
     {
-        // Kiểm tra xem combo khách muốn đặt có tồn tại không
+        // Lấy thông tin combo để hiển thị trên form đặt hàng
         $combo = Combo::findOrFail($combo_id);
-        
-        // Trả về file giao diện form đặt hàng (sẽ tạo ở Bước 3)
         return view('client.bookings.create', compact('combo'));
     }
 
     /**
-     * 2. Hàm xử lý lưu đơn hàng khi khách bấm nút "XÁC NHẬN ĐẶT NGAY"
+     * Xử lý lưu đơn đặt combo vào database
+     * Đáp ứng yêu cầu: Đặt combo trực tuyến & Validation dữ liệu
      */
-    public function store(Request $request, $combo_id)
+    public function store(Request $request)
     {
-        $combo = Combo::findOrFail($combo_id);
-
-        // Kiểm tra dữ liệu khách nhập vào xem có hợp lệ không
+        // 1. Validation: Kiểm tra dữ liệu người dùng nhập vào
         $request->validate([
+            'combo_id' => 'required|exists:combos,id',
             'customer_name' => 'required|string|max:255',
-            'customer_phone' => 'required|string|max:20',
-            'customer_email' => 'required|email',
-            'quantity' => 'required|integer|min:1',
+            'customer_phone' => 'required|numeric',
+            'customer_note' => 'nullable|string',
         ], [
-            'customer_name.required' => 'Vui lòng nhập họ tên của bạn',
-            'customer_phone.required' => 'Vui lòng nhập số điện thoại',
-            'customer_email.required' => 'Vui lòng nhập đúng định dạng email',
-            'quantity.min' => 'Số lượng người đi phải ít nhất là 1 người',
+            'customer_name.required' => 'Vui lòng nhập họ tên người đặt.',
+            'customer_phone.required' => 'Vui lòng nhập số điện thoại liên hệ.',
+            'customer_phone.numeric' => 'Số điện thoại phải là định dạng số.',
         ]);
 
-        // Tính tổng tiền = giá 1 combo x số lượng người đi
-        $totalPrice = $combo->price * $request->quantity;
+        // 2. Lấy thông tin combo để xác định giá tiền (Tính giá tự động)
+        $combo = Combo::findOrFail($request->combo_id);
 
-        // Lưu thông tin đơn hàng vào bảng 'orders' trong Database
-        // (Lưu ý: Nếu bảng quản lý đơn của nhóm bạn tên là 'bookings' thì bạn đổi chữ 'orders' thành 'bookings' nhé)
-        DB::table('orders')->insert([
+        // 3. Lưu vào bảng bookings trong MySQL
+        Booking::create([
+            'user_id' => Auth::id(), // ID của người dùng đang đăng nhập
             'combo_id' => $combo->id,
-            'customer_name' => $request->customer_name,
-            'customer_phone' => $request->customer_phone,
-            'customer_email' => $request->customer_email,
-            'quantity' => $request->quantity,
-            'total_price' => $totalPrice,
-            'status' => 'pending', // Trạng thái: Chờ admin duyệt đơn
-            'created_at' => now(),
-            'updated_at' => now(),
+            'total_price' => $combo->total_price, // Lấy giá từ combo
+            'customer_note' => $request->customer_note,
+            'status' => 'pending', // Mặc định trạng thái là "Chờ xác nhận"
         ]);
 
-        // Đặt thành công thì quay về trang chủ và bắn một thông báo xanh lè động viên khách
-        return redirect()->route('home')->with('success', 'Đặt combo thành công! Đội ngũ DuLịch123 sẽ liên hệ duyệt đơn cho bạn sớm nhất.');
+        // 4. Chuyển hướng về trang lịch sử với thông báo thành công
+        return redirect()->route('booking.history')
+                         ->with('success', 'Bạn đã đặt combo thành công! Vui lòng chờ nhân viên xác nhận.');
+    }
+
+    /**
+     * Hiển thị lịch sử đặt combo của người dùng
+     * Đáp ứng yêu cầu: Xem lịch sử đặt combo
+     */
+    public function history()
+    {
+        // Lấy danh sách đơn đặt của riêng người dùng đang đăng nhập
+        // Sử dụng eager loading 'combo' để lấy tên và ảnh combo nhanh hơn
+        $bookings = Booking::where('user_id', Auth::id())
+                            ->with('combo')
+                            ->latest()
+                            ->get();
+
+        return view('client.bookings.history', compact('bookings'));
     }
 }

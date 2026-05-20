@@ -13,16 +13,42 @@ class BookingManageController extends Controller
      */
     public function index()
     {
-        // Lấy danh sách các đơn hàng mới nhất và phân trang (mỗi trang 10 đơn)
-        $bookings = Booking::latest()->paginate(10);
+        // 1. Lấy danh sách các đơn hàng mới nhất và phân trang hoặc lấy toàn bộ
+        // Đổi tên biến từ $bookings thành $orders để khớp khít với vòng lặp @foreach($orders) ngoài View
+        $orders = Booking::with(['user', 'combo'])->latest()->get();
 
-        // Kiểm tra xem nhóm đã tạo file view danh sách chưa
-        if (view()->exists('admin.bookings.index')) {
-            return view('admin.bookings.index', compact('bookings'));
+        // 2. Kiểm tra xem file view có nằm trong thư mục admin/orders/index.blade.php không
+        if (view()->exists('admin.orders.index')) {
+            return view('admin.orders.index', compact('orders'));
         }
         
-        // Nếu lỡ nhóm chưa làm file view riêng, tạm thời trả về trang dashboard 
-        // để không bị màn hình lỗi đỏ cho đến khi thiết kế xong view
-        return redirect()->route('admin.dashboard')->with('info', 'Hệ thống đã nhận lệnh nhưng file view danh sách đơn hàng (admin.bookings.index) đang được xây dựng.');
+        // Dự phòng an toàn nếu lỡ xóa nhầm file view
+        return redirect()->route('admin.dashboard')->with('error', 'Không tìm thấy file view giao diện quản lý đơn hàng.');
+    }
+
+    /**
+     * Xử lý phê duyệt trạng thái đơn hàng (Khớp với route PATCH admin.orders.update)
+     */
+    public function updateStatus(Request $request, $id)
+    {
+        $order = Booking::findOrFail($id);
+        $order->status = $request->input('status', 'confirmed');
+        $order->save();
+
+        return redirect()->route('admin.orders.index')->with('success', 'Cập nhật trạng thái đơn hàng thành công!');
+    }
+
+    /**
+     * Xem chi tiết đơn hàng (Khớp với route admin.orders.show)
+     */
+    public function show($id)
+    {
+        $order = Booking::with(['user', 'combo'])->findOrFail($id);
+        
+        if (view()->exists('admin.orders.show')) {
+            return view('admin.orders.show', compact('order'));
+        }
+        
+        return back()->with('info', 'Tính năng xem chi tiết đơn hàng đang được hoàn thiện.');
     }
 }

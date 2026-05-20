@@ -57,6 +57,9 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::get('/orders', [BookingManageController::class, 'index'])->name('orders.index');
     Route::get('/bookings', [BookingManageController::class, 'index'])->name('bookings.index');
     Route::patch('/orders/{id}/status', [BookingManageController::class, 'updateStatus'])->name('orders.update');
+    
+    // ĐÃ THÊM: Tuyến đường xem chi tiết đơn đặt tour tách biệt sạch lỗi 500
+    Route::get('/orders/{id}', [BookingManageController::class, 'show'])->name('orders.show');
 
     Route::get('/users', [AdminController::class, 'users'])->name('users.index');
 });

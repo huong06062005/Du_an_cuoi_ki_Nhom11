@@ -10,12 +10,13 @@ use Illuminate\Support\Facades\Schema;
 class HomeController extends Controller
 {
     /**
-     * 1. HÀM HIỂN THỊ TRANG CHỦ (Đã chạy ngon, giữ nguyên)
+     * 1. HÀM HIỂN THỊ TRANG CHỦ - CHỈ HIỂN THỊ ĐÚNG 6 COMBO PHỔ BIẾN NHẤT
      */
     public function index(Request $request)
     {
         $query = Combo::with('services');
 
+        // Lọc tìm các gói phổ biến có chữ [POPULAR] trong mô tả
         $query->where(function($q) {
             if (Schema::hasColumn('combos', 'description')) {
                 $q->orWhere('description', 'LIKE', '%[POPULAR]%');
@@ -25,14 +26,31 @@ class HomeController extends Controller
             }
         });
 
-        $combos = $query->orderByDesc('id')->get();
+        $rawFeatured = $query->orderByDesc('id')->get();
 
-        if ($combos->count() < 6) {
-            $combos = Combo::with('services')->orderBy('id', 'asc')->take(6)->get();
+        // Ép unique lọc trùng tên
+        if (Schema::hasColumn('combos', 'name')) {
+            $featuredCombos = $rawFeatured->unique('name')->values();
         } else {
-            $combos = $combos->take(6);
+            $featuredCombos = $rawFeatured->unique('ten_combo')->values();
         }
 
+        // BẪY LỖI: Nếu số gói tích POPULAR ít hơn 6, lấy thêm gói nền gốc nạp vào cho đủ 6 ô khít giao diện
+        if ($featuredCombos->count() < 6) {
+            $rawDefault = Combo::with('services')->orderBy('id', 'asc')->get();
+            if (Schema::hasColumn('combos', 'name')) {
+                $defaultCombos = $rawDefault->unique('name')->values();
+            } else {
+                $defaultCombos = $rawDefault->unique('ten_combo')->values();
+            }
+            // Gộp mảng và cắt đúng 6 gói đầu tiên
+            $combos = $featuredCombos->merge($defaultCombos)->unique('id')->take(6);
+        } else {
+            // Nếu nhiều hơn 6 gói phổ biến, cũng chỉ lấy đúng 6 gói nổi bật nhất
+            $combos = $featuredCombos->take(6);
+        }
+
+        // Dọn sạch từ khóa ẩn kỹ thuật [POPULAR]
         foreach ($combos as $combo) {
             if (isset($combo->description)) {
                 $combo->description = trim(str_replace('[POPULAR]', '', $combo->description));
@@ -49,7 +67,7 @@ class HomeController extends Controller
     }
 
     /**
-     * 2. HÀM HIỂN THỊ TRANG GÓI COMBO - KHÓA TẬN GỐC LỖI LẶP DỮ LIỆU
+     * 2. HÀM HIỂN THỊ TRANG GÓI COMBO - BUNG ĐẦY ĐỦ 20 GÓI SẠCH LỖI LẶP
      */
     public function allCombos(Request $request)
     {
@@ -66,17 +84,15 @@ class HomeController extends Controller
             });
         }
 
-        // Bước 1: Lấy toàn bộ danh sách thô sắp xếp theo ID giảm dần
         $rawCombos = $query->orderByDesc('id')->get();
 
-        // Bước 2: ÉP UNIQUE SẠCH THEO TÊN + GỌI VALUES() ĐỂ RESET KEY MẢNG GỐC (BẮT BUỘC)
+        // Lọc trùng tên để giữ lại đúng 20 gói gốc độc nhất
         if (Schema::hasColumn('combos', 'name')) {
             $combos = $rawCombos->unique('name')->values();
         } else {
             $combos = $rawCombos->unique('ten_combo')->values();
         }
 
-        // Bước 3: Dọn sạch từ khóa ẩn kỹ thuật [POPULAR]
         foreach ($combos as $combo) {
             if (isset($combo->description)) {
                 $combo->description = trim(str_replace('[POPULAR]', '', $combo->description));

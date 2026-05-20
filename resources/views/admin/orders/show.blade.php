@@ -1,4 +1,4 @@
-@extends('admin.layout.admin')
+@extends('admin.layouts.admin')
 
 @section('title', 'CHI TIẾT ĐƠN HÀNG')
 
@@ -23,33 +23,40 @@
             </div>
             <div class="text-right">
                 <div class="text-xs text-slate-400 uppercase font-bold">Ngày khởi tạo</div>
-                <div class="text-lg font-bold">{{ $order->created_at->format('d F, Y') }}</div>
+                <div class="text-lg font-bold">{{ optional($order->created_at)->format('d F, Y') ?? 'Chưa rõ ngày' }}</div>
             </div>
         </div>
 
-        <div class="p-8 grid grid-cols-2 gap-12">
+        <div class="p-8 grid grid-cols-1 md:grid-cols-2 gap-12">
             <div>
                 <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Thông tin khách hàng</h3>
                 <div class="space-y-3">
-                    <p class="text-slate-800 font-bold text-lg">{{ $order->customer_name }}</p>
-                    <p class="text-slate-600"><i class="fas fa-envelope w-6 text-blue-500"></i> {{ $order->email }}</p>
-                    <p class="text-slate-600"><i class="fas fa-phone w-6 text-blue-500"></i> {{ $order->phone }}</p>
-                    <p class="text-slate-600"><i class="fas fa-map-marker-alt w-6 text-blue-500"></i> {{ $order->address }}</p>
+                    {{-- Đã sửa an toàn: Gọi thông qua quan hệ $order->user đã kết nối --}}
+                    <p class="text-slate-800 font-bold text-lg">{{ $order->user->name ?? ($order->customer_name ?? 'Khách hàng ẩn danh') }}</p>
+                    <p class="text-slate-600"><i class="fas fa-envelope w-6 text-blue-500"></i> {{ $order->user->email ?? ($order->email ?? 'Chưa cập nhật email') }}</p>
+                    <p class="text-slate-600"><i class="fas fa-phone w-6 text-blue-500"></i> {{ $order->user->phone ?? ($order->phone ?? 'Chưa có số điện thoại') }}</p>
+                    <p class="text-slate-600"><i class="fas fa-map-marker-alt w-6 text-blue-500"></i> {{ $order->user->address ?? ($order->address ?? 'Chưa cập nhật địa chỉ') }}</p>
                 </div>
             </div>
 
             <div class="bg-slate-50 p-6 rounded-xl border border-slate-100">
                 <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Dịch vụ đã đặt</h3>
                 <div class="flex items-center mb-4">
-                    <img src="{{ asset('storage/'.$order->combo->hinh_anh) }}" class="w-16 h-12 object-cover rounded-lg mr-4">
+                    {{-- Kiểm tra an toàn nguồn ảnh để tránh vỡ giao diện --}}
+                    @php
+                        $comboImage = $order->combo->image ?? ($order->combo->hinh_anh ?? '');
+                        $displayComboImage = filter_var($comboImage, FILTER_VALIDATE_URL) ? $comboImage : (empty($comboImage) ? 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80' : asset('storage/' . $comboImage));
+                    @endphp
+                    <img src="{{ $displayComboImage }}" class="w-16 h-12 object-cover rounded-lg mr-4" onerror="this.src='https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80';">
+                    
                     <div>
-                        <p class="font-bold text-slate-800">{{ $order->combo->ten_combo }}</p>
+                        <p class="font-bold text-slate-800">{{ $order->combo->name ?? ($order->combo->ten_combo ?? 'Combo không xác định') }}</p>
                         <p class="text-xs text-slate-500 italic">Gói dịch vụ cao cấp</p>
                     </div>
                 </div>
                 <div class="border-t border-slate-200 pt-4 flex justify-between items-end">
                     <span class="text-sm font-bold text-slate-500 uppercase">Tổng thanh toán</span>
-                    <span class="text-2xl font-black text-blue-600">{{ number_format($order->total_price) }}đ</span>
+                    <span class="text-2xl font-black text-blue-600">{{ number_format($order->total_price ?? ($order->price ?? 0)) }}đ</span>
                 </div>
             </div>
         </div>
@@ -57,7 +64,7 @@
         <div class="px-8 pb-8">
             <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded-r-lg">
                 <h4 class="text-xs font-bold text-blue-700 uppercase mb-1">Yêu cầu bổ sung:</h4>
-                <p class="text-sm text-slate-600 italic">"{{ $order->note ?? 'Không có yêu cầu đặc biệt' }}"</p>
+                <p class="text-sm text-slate-600 italic">"{{ $order->note ?? ($order->ghi_chu ?? 'Không có yêu cầu đặc biệt') }}"</p>
             </div>
         </div>
     </div>

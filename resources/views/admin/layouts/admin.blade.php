@@ -40,10 +40,13 @@
                 </a>
 
                 <div class="pt-4 border-t border-slate-800 mt-4">
+                    {{-- ĐÃ ẨN KHỐI "XEM TRANG CHỦ" THEO YÊU CẦU ĐỂ MENU ADMIN GỌN GÀNG --}}
+                    {{-- 
                     <a href="{{ route('home') }}" class="flex items-center space-x-3 p-3 rounded-xl hover:bg-slate-800">
                         <i class="fas fa-external-link-alt w-5"></i>
                         <span class="font-bold text-sm">Xem trang chủ</span>
                     </a>
+                    --}}
 
                     <a href="{{ route('logout') }}" class="w-full flex items-center space-x-3 p-3 rounded-xl hover:bg-red-500/10 text-red-400 mt-2">
                         <i class="fas fa-sign-out-alt w-5"></i>

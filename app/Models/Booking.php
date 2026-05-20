@@ -9,7 +9,7 @@ class Booking extends Model
 {
     use HasFactory;
 
-    // Đã sửa tại đây: Thêm tất cả các cột cần lưu dữ liệu của bảng bookings vào
+    // Giữ nguyên đống fillable chuẩn của bảng bookings máy em
     protected $fillable = [
         'user_id',
         'combo_id',
@@ -18,7 +18,16 @@ class Booking extends Model
     ];
 
     /**
-     * Thiết lập mối quan hệ liên kết ngược với Model Combo (nếu nhóm bạn cần dùng)
+     * 1. THÊM MỚI: Thiết lập mối quan hệ liên kết ngược với Model User (SỬA LỖI ĐỎ LÒM NÃY GIỜ)
+     * Mỗi đơn đặt tour (Booking) bắt buộc phải thuộc về một tài khoản Khách hàng (User)
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    /**
+     * 2. Thiết lập mối quan hệ liên kết ngược với Model Combo
      */
     public function combo()
     {

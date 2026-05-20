@@ -39,22 +39,27 @@
         <div class="max-w-[1440px] mx-auto px-6"> 
             <div class="flex justify-between items-end mb-12">
                 <div>
-                    <h2 class="text-3xl font-black text-slate-900 uppercase">Danh sách Gói Combo</h2>
+                    <h2 class="text-3xl font-black text-slate-900 uppercase">Gói Combo Phổ Biến</h2>
                     <div class="h-1.5 w-20 bg-blue-600 mt-2 rounded-full"></div>
                 </div>
-                {{-- ĐÃ SỬA: Thêm route() để chuyển hướng sang trang tất cả gói combo sạch lỗi lặp --}}
+                {{-- ĐÃ CHUẨN HÓA: Giữ nguyên route chuyển hướng sang trang 20 combo sạch lỗi lặp --}}
                 <a href="{{ route('combos.index') }}" class="text-blue-600 font-bold text-sm hover:underline">Xem tất cả combo →</a>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-                @foreach($combos as $combo)
+                {{-- 🔥 ĐÃ CẬP NHẬT: Thêm ->take(6) khống chế cứng hiển thị đúng 6 gói phổ biến nhất ngoài trang chủ --}}
+                @foreach($combos->take(6) as $combo)
                     <div class="bg-white rounded-[32px] overflow-hidden shadow-[0_10px_40px_rgba(0,0,0,0.04)] hover:shadow-[0_30px_70px_rgba(0,0,0,0.12)] transition-all duration-500 group border border-slate-100 flex flex-col h-full">
                         {{-- Phần Ảnh Đại Diện Combo --}}
-                        <div class="relative h-80 overflow-hidden">
-                            <img src="{{ $combo->image_url }}" alt="{{ $combo->name }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
+                        <div class="relative h-80 overflow-hidden bg-slate-100">
+                            @php
+                                $rawImage = $combo->image_url ?? ($combo->image ?? ($combo->hinh_anh ?? ''));
+                                $displayImageUrl = filter_var($rawImage, FILTER_VALIDATE_URL) ? $rawImage : (empty($rawImage) ? 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80' : asset('storage/' . $rawImage));
+                            @endphp
+                            <img src="{{ $displayImageUrl }}" alt="{{ $combo->name ?? $combo->ten_combo }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" onerror="this.src='https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80';">
                             
                             {{-- Hiển thị nhãn nổi bật --}}
-                            @if(($combo->is_featured ?? 0) == 1 || ($combo->noi_bat ?? 0) == 1)
+                            @if(($combo->is_featured ?? 0) == 1 || ($combo->noi_bat ?? 0) == 1 || ($combo->pho_bien ?? 0) == 1)
                                 <div class="absolute top-6 left-6 bg-red-500 text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm">
                                     BÁN CHẠY 🔥
                                 </div>
@@ -68,7 +73,7 @@
                             </h3>
                             
                             <p class="text-xs text-slate-400 mb-6 line-clamp-2 italic">
-                                {{ $combo->mo_ta_text }}
+                                {{ $combo->mo_ta_text ?? ($combo->description ?? $combo->mo_ta) }}
                             </p>
 
                             {{-- Khối Hiển Thị Giá Tiền --}}

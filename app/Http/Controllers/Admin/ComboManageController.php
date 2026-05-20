@@ -4,71 +4,71 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-use App\Models\Combo;   // Model Combo
-use App\Models\Service; // Đảm bảo đã chạy php artisan make:model Service
+use App\Models\Combo;
+use App\Models\Service;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 class ComboManageController extends Controller
 {
-    /**
-     * Hiển thị danh sách các gói combo du lịch
-     */
     public function index()
     {
         $combos = Combo::latest()->get();
         return view('admin.combos.index', compact('combos'));
     }
 
-    /**
-     * Hiển thị form tạo mới combo
-     */
     public function create()
     {
-        // Lấy tất cả dịch vụ thành phần để admin chọn
-        $services = Service::all(); 
+        $services = Service::all();
         return view('admin.combos.create', compact('services'));
     }
 
-    /**
-     * Lưu combo mới
-     */
     public function store(Request $request)
     {
-        // 1. Validation dữ liệu (Sửa tên field cho khớp với form của em)
         $request->validate([
-            'ten_combo' => 'required|string|max:255',
-            'mo_ta' => 'required',
-            'hinh_anh' => 'required|image|mimes:jpeg,png,jpg|max:2048',
-            'services' => 'required|array' 
+            'ten_combo'    => 'required|string|max:255',
+            'mo_ta'        => 'required',
+            'services'     => 'required|array',
+            'hinh_anh'     => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'hinh_anh_url' => 'nullable|url'
         ]);
 
-        // 2. Xử lý upload hình ảnh
         $hinh_anh_path = null;
         if ($request->hasFile('hinh_anh')) {
             $hinh_anh_path = $request->file('hinh_anh')->store('combos', 'public');
+        } elseif ($request->filled('hinh_anh_url')) {
+            $hinh_anh_path = $request->hinh_anh_url;
         }
 
-        // 3. Logic tính giá combo tự động dựa trên giá của từng dịch vụ
-        // Lưu ý: Cột giá trong bảng services của em phải là 'gia_tien' hoặc 'price' tùy em đặt
-        $totalPrice = Service::whereIn('id', $request->services)->sum('gia_tien');
+        $priceColumn = Schema::hasColumn('services', 'price') ? 'price' : 'gia_tien';
+        $totalPrice = Service::whereIn('id', $request->services)->sum($priceColumn);
 
-        // 4. Lưu vào Database (Sửa tên cột cho khớp với Migration)
-        $combo = Combo::create([
-            'ten_combo' => $request->ten_combo,
-            'mo_ta' => $request->mo_ta,
-            'hinh_anh' => $hinh_anh_path,
-            'gia_tien' => $totalPrice,
-        ]);
+        $insertData = [
+            'name'        => $request->ten_combo,
+            'ten_combo'   => $request->ten_combo,
+            'description' => $request->mo_ta,
+            'mo_ta'       => $request->mo_ta,
+            'image'       => $hinh_anh_path,
+            'hinh_anh'    => $hinh_anh_path,
+            'price'       => $totalPrice,
+            'gia_tien'    => $totalPrice,
+            'status'      => 1,
+            'trang_thai'  => 1,
+        ];
 
-        // 5. Lưu vào bảng trung gian
-        $combo->services()->attach($request->services);
-
-        return redirect()->route('admin.combos.index')->with('success', 'Tạo combo du lịch thành công!');
+        DB::beginTransaction();
+        try {
+            $combo = Combo::create($insertData);
+            $combo->services()->attach($request->services);
+            DB::commit();
+            return redirect()->route('admin.combos.index')->with('success', 'Tạo combo thành công!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->withInput()->with('error', 'Lỗi: ' . $e->getMessage());
+        }
     }
 
-    /**
-     * Hiển thị form chỉnh sửa
-     */
     public function edit($id)
     {
         $combo = Combo::with('services')->findOrFail($id);
@@ -76,54 +76,72 @@ class ComboManageController extends Controller
         return view('admin.combos.edit', compact('combo', 'services'));
     }
 
-    /**
-     * Cập nhật combo
-     */
     public function update(Request $request, $id)
     {
         $combo = Combo::findOrFail($id);
 
         $request->validate([
-            'ten_combo' => 'required|string|max:255',
-            'mo_ta' => 'required',
-            'services' => 'required|array'
+            'ten_combo'    => 'required|string|max:255',
+            'mo_ta'        => 'required',
+            'services'     => 'required|array',
+            'hinh_anh'     => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
+            'hinh_anh_url' => 'nullable|url'
         ]);
 
-        $data = [
-            'ten_combo' => $request->ten_combo,
-            'mo_ta' => $request->mo_ta,
+        $priceColumn = Schema::hasColumn('services', 'price') ? 'price' : 'gia_tien';
+        $totalPrice = Service::whereIn('id', $request->services)->sum($priceColumn);
+
+        // Mảng cập nhật: Luôn lấy giá trị cũ trước
+        $updateData = [
+            'name'        => $request->ten_combo,
+            'ten_combo'   => $request->ten_combo,
+            'description' => $request->mo_ta,
+            'mo_ta'       => $request->mo_ta,
+            'price'       => $totalPrice,
+            'gia_tien'    => $totalPrice,
         ];
 
+        // Xử lý ảnh: Chỉ thay đổi nếu có upload hoặc link mới
+        $newImagePath = null;
         if ($request->hasFile('hinh_anh')) {
-            if ($combo->hinh_anh) {
-                Storage::disk('public')->delete($combo->hinh_anh);
-            }
-            $data['hinh_anh'] = $request->file('hinh_anh')->store('combos', 'public');
+            $newImagePath = $request->file('hinh_anh')->store('combos', 'public');
+        } elseif ($request->filled('hinh_anh_url')) {
+            $newImagePath = $request->hinh_anh_url;
         }
 
-        // Tính lại giá
-        $totalPrice = Service::whereIn('id', $request->services)->sum('gia_tien');
-        $data['gia_tien'] = $totalPrice;
+        if ($newImagePath) {
+            $updateData['image']    = $newImagePath;
+            $updateData['hinh_anh'] = $newImagePath;
+        }
 
-        $combo->update($data);
-        $combo->services()->sync($request->services);
+        DB::beginTransaction();
+        try {
+            // Lưu ảnh cũ để xóa sau nếu cần
+            $oldImage = $combo->image ?? $combo->hinh_anh;
 
-        return redirect()->route('admin.combos.index')->with('success', 'Cập nhật combo thành công!');
+            $combo->update($updateData);
+            $combo->services()->sync($request->services);
+
+            // Chỉ xóa ảnh cũ nếu có ảnh mới và ảnh cũ là file local (không phải link)
+            if ($newImagePath && $oldImage && !filter_var($oldImage, FILTER_VALIDATE_URL)) {
+                if (Storage::disk('public')->exists($oldImage)) {
+                    Storage::disk('public')->delete($oldImage);
+                }
+            }
+
+            DB::commit();
+            return redirect()->route('admin.combos.index')->with('success', 'Cập nhật thành công!');
+        } catch (\Exception $e) {
+            DB::rollBack();
+            return redirect()->back()->withInput()->with('error', 'Lỗi: ' . $e->getMessage());
+        }
     }
 
-    /**
-     * Xóa combo
-     */
     public function destroy($id)
     {
         $combo = Combo::findOrFail($id);
-        
-        if ($combo->hinh_anh) {
-            Storage::disk('public')->delete($combo->hinh_anh);
-        }
-
+        $combo->services()->detach();
         $combo->delete();
-
-        return redirect()->route('admin.combos.index')->with('success', 'Đã xóa combo thành công!');
+        return redirect()->route('admin.combos.index')->with('success', 'Đã xóa!');
     }
 }

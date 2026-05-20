@@ -10,6 +10,19 @@
         </a>
     </div>
 
+    @if ($errors->any())
+        <div class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-xl shadow-sm text-sm text-red-700">
+            <div class="flex items-center mb-2 font-bold uppercase tracking-wide">
+                <i class="fas fa-exclamation-circle mr-2 text-red-500"></i> Vui lòng kiểm tra lại các thông tin sau:
+            </div>
+            <ul class="list-disc pl-5 space-y-1">
+                @foreach ($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
+        </div>
+    @endif
+
     <form action="{{ route('admin.combos.store') }}" method="POST" enctype="multipart/form-data" class="space-y-6">
         @csrf
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -27,7 +40,7 @@
 
             <div class="col-span-2 md:col-span-1">
                 <label class="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wide">Đơn giá dự kiến (VNĐ)</label>
-                <input type="number" name="gia_tien" value="{{ old('gia_tien') }}" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none shadow-sm bg-slate-50 text-slate-500" placeholder="Hệ thống tự tính nếu chọn dịch vụ..." readonly>
+                <input type="number" id="total-price-input" name="gia_tien" value="{{ old('gia_tien', 0) }}" class="w-full px-4 py-3 rounded-xl border border-slate-200 focus:ring-2 focus:ring-blue-500 outline-none shadow-sm bg-slate-50 text-slate-600 font-bold" placeholder="Hệ thống tự tính..." readonly>
                 <p class="text-[11px] text-slate-400 mt-1 italic">* Giá tiền sẽ tự động tính bằng tổng các dịch vụ được chọn dưới đây.</p>
             </div>
 
@@ -35,18 +48,23 @@
                 <label class="block text-sm font-bold text-slate-700 mb-2 uppercase tracking-wide">Chọn các dịch vụ bao gồm</label>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 bg-slate-50/70 rounded-xl border border-slate-200 shadow-inner">
                     @forelse($services as $service)
+                    @php
+                        // Khảo sát xem dịch vụ đang dùng tên cột tiếng Anh hay tiếng Việt
+                        $servicePrice = $service->gia_tien ?? $service->price ?? 0;
+                        $serviceName = $service->name ?? $service->ten_dich_vu ?? 'Dịch vụ chưa có tên';
+                    @endphp
                     <label class="flex items-center space-x-3 p-3 bg-white rounded-xl shadow-sm border border-slate-100 cursor-pointer hover:border-blue-400 hover:shadow transition-all">
-                        <input type="checkbox" name="services[]" value="{{ $service->id }}" class="rounded text-blue-600 focus:ring-blue-500 w-4 h-4 border-slate-300">
+                        <input type="checkbox" name="services[]" value="{{ $service->id }}" data-price="{{ $servicePrice }}" class="service-checkbox rounded text-blue-600 focus:ring-blue-500 w-4 h-4 border-slate-300">
                         <div class="text-sm">
-                            <span class="font-bold text-slate-800 block">{{ $service->name ?? $service->ten_dich_vu }}</span>
-                            <span class="text-blue-600 text-xs font-semibold">{{ number_format($service->gia_tien ?? $service->price) }}đ</span>
+                            <span class="font-bold text-slate-800 block">{{ $serviceName }}</span>
+                            <span class="text-blue-600 text-xs font-semibold">{{ number_format($servicePrice) }}đ</span>
                         </div>
                     </label>
                     @empty
                     <div class="col-span-2 text-center py-6 text-slate-400 text-sm italic">
                         <i class="fas fa-exclamation-triangle text-amber-500 mr-1"></i> Chưa có dịch vụ nào trong hệ thống. Hãy tạo dịch vụ trước nhé!
                     </div>
-                    @endforelse
+                    @endempty
                 </div>
                 @error('services') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
             </div>
@@ -65,4 +83,29 @@
         </div>
     </form>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+        const checkboxes = document.querySelectorAll('.service-checkbox');
+        const totalPriceInput = document.getElementById('total-price-input');
+
+        function calculateTotal() {
+            let total = 0;
+            checkboxes.forEach(checkbox => {
+                if (checkbox.checked) {
+                    total += parseFloat(checkbox.getAttribute('data-price')) || 0;
+                }
+            });
+            totalPriceInput.value = total;
+        }
+
+        // Lắng nghe sự kiện click chọn trên từng ô Checkbox dịch vụ
+        checkboxes.forEach(checkbox => {
+            checkbox.addEventListener('change', calculateTotal);
+        });
+
+        // Chạy tính toán một lần ban đầu phòng trường hợp nhấn quay lại trang (old input)
+        calculateTotal();
+    });
+</script>
 @endsection

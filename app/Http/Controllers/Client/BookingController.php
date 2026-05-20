@@ -60,14 +60,13 @@ class BookingController extends Controller
      * Đáp ứng yêu cầu: Xem lịch sử đặt combo
      */
     public function history()
-    {
-        // Lấy danh sách đơn đặt của riêng người dùng đang đăng nhập
-        // Sử dụng eager loading 'combo' để lấy tên và ảnh combo nhanh hơn
-        $bookings = Booking::where('user_id', Auth::id())
-                            ->with('combo')
-                            ->latest()
-                            ->get();
+{
+    // Vì bảng bookings chưa có user_id, tạm thời lấy toàn bộ đơn hàng ra để test giao diện 
+    // Sau này khi Admin thêm cột user_id, mình chỉ cần sửa lại điều kiện lọc sau.
+    $bookings = Booking::with('combo')
+                        ->latest()
+                        ->get();
 
-        return view('client.bookings.history', compact('bookings'));
-    }
+    return view('client.bookings.history', compact('bookings'));
+}
 }

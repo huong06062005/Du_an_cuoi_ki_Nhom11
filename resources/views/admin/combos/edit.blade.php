@@ -6,7 +6,7 @@
 <div class="max-w-3xl mx-auto">
     <form action="{{ route('admin.combos.update', $combo->id) }}" method="POST" enctype="multipart/form-data" class="space-y-6">
         @csrf
-        @method('PUT') {{-- Bắt buộc dùng PUT hoặc PATCH cho chức năng Update --}}
+        @method('PUT') {{--Bắt buộc dùng PUT hoặc PATCH cho chức năng Update --}}
         
         <h2 class="text-lg font-bold text-slate-800 mb-6 uppercase border-l-4 border-blue-600 pl-4">Cập nhật thông tin mã hiệu #{{ $combo->id }}</h2>
 

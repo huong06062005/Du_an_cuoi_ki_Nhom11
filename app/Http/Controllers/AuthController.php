@@ -9,7 +9,7 @@ use Illuminate\Support\Facades\Hash;
 
 class AuthController extends Controller 
 {
-    // 1. Hiển thị form đăng nhập trung anh very 
+    // 1. Hiển thị form đăng nhập 
     public function showLogin() 
     {
         return view('auth.login'); 

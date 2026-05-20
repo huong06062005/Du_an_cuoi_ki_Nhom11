@@ -29,7 +29,12 @@
                     <span class="font-bold text-sm">Quản lý Combo</span>
                 </a>
 
-                <a href="{{ route('admin.orders.index') }}" class="flex items-center space-x-3 p-3 rounded-xl hover:bg-slate-800 transition-all {{ request()->routeIs('admin.orders.*') ? 'bg-blue-600 text-white' : '' }}">
+                <a href="{{ Route::has('admin.services.index') ? route('admin.services.index') : '#' }}" class="flex items-center space-x-3 p-3 rounded-xl hover:bg-slate-800 transition-all {{ request()->routeIs('admin.services.*') ? 'bg-blue-600 text-white' : '' }}">
+                    <i class="fas fa-concierge-bell w-5"></i>
+                    <span class="font-bold text-sm">Quản lý dịch vụ</span>
+                </a>
+
+                <a href="{{ Route::has('admin.bookings.index') ? route('admin.bookings.index') : '#' }}" class="flex items-center space-x-3 p-3 rounded-xl hover:bg-slate-800 transition-all {{ request()->routeIs('admin.bookings.*') ? 'bg-blue-600 text-white' : '' }}">
                     <i class="fas fa-calendar-check w-5"></i>
                     <span class="font-bold text-sm">Đơn đặt Tour</span>
                 </a>
@@ -61,9 +66,17 @@
                 </div>
             </header>
 
+            {{-- Hiển thị thông báo thành công của hệ thống --}}
             @if(session('success'))
                 <div class="bg-emerald-50 text-emerald-600 p-4 rounded-xl mb-6 border border-emerald-100 font-bold text-sm flex items-center">
                     <i class="fas fa-check-circle mr-2"></i> {{ session('success') }}
+                </div>
+            @endif
+
+            {{-- Hiển thị thông báo thông tin bổ sung --}}
+            @if(session('info'))
+                <div class="bg-blue-50 text-blue-600 p-4 rounded-xl mb-6 border border-blue-100 font-bold text-sm flex items-center">
+                    <i class="fas fa-info-circle mr-2"></i> {{ session('info') }}
                 </div>
             @endif
 

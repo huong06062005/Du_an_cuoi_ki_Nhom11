@@ -15,6 +15,7 @@ class ServiceController extends Controller
      */
     public function index()
     {
+        // Lấy danh sách dịch vụ mới nhất từ Database
         $services = Service::latest()->get();
         return view('admin.services.index', compact('services'));
     }
@@ -32,7 +33,7 @@ class ServiceController extends Controller
      */
     public function store(Request $request)
     {
-        // 1. Validation nghiêm ngặt dữ liệu đầu vào
+        // 1. Validation nghiêm ngặt dữ liệu đầu vào từ form
         $request->validate([
             'name' => 'required|string|max:255',
             'type' => 'required|in:flight,hotel,attraction,transport', // Bắt buộc chọn đúng phân loại
@@ -41,23 +42,31 @@ class ServiceController extends Controller
             'mo_ta_chi_tiet' => 'nullable|string'
         ]);
 
-        // 2. Gom dữ liệu cơ bản
+        // 2. Gom dữ liệu cơ bản (Tự động bọc lót cả 2 phương án tiếng Anh và tiếng Việt cho an toàn database)
         $data = [
             'name' => $request->name,
+            'ten_dich_vu' => $request->name,
+            
             'type' => $request->type,
+            'loai_dich_vu' => $request->type,
+            
             'price' => $request->price,
-            'mo_ta' => $request->mo_ta_chi_tiet, // Lưu thông tin bổ sung (Hãng bay, Số sao khách sạn...)
+            'gia_tien' => $request->price,
+            
+            'mo_ta' => $request->mo_ta_chi_tiet, 
+            'mo_ta_chi_tiet' => $request->mo_ta_chi_tiet, 
         ];
 
         // 3. Xử lý upload hình ảnh dịch vụ nếu có
         if ($request->hasFile('image')) {
-            $data['image'] = $request->file('image')->store('services', 'public');
+            $imagePath = $request->file('image')->store('services', 'public');
+            $data['image'] = $imagePath;
+            $data['hinnh_anh'] = $imagePath; // Dự phòng trường tên cột tiếng Việt
         }
 
         // 4. Lưu dữ liệu vào bảng MySQL
         Service::create($data);
 
-        // Chú ý sửa route thành admin.services.index cho đúng cấu trúc
         return redirect()->route('admin.services.index')->with('success', 'Thêm dịch vụ thành công!');
     }
 
@@ -87,17 +96,31 @@ class ServiceController extends Controller
 
         $data = [
             'name' => $request->name,
+            'ten_dich_vu' => $request->name,
+            
             'type' => $request->type,
+            'loai_dich_vu' => $request->type,
+            
             'price' => $request->price,
+            'gia_tien' => $request->price,
+            
             'mo_ta' => $request->mo_ta_chi_tiet,
+            'mo_ta_chi_tiet' => $request->mo_ta_chi_tiet,
         ];
 
         // Xử lý thay thế ảnh cũ nếu có upload ảnh mới
         if ($request->hasFile('image')) {
-            if ($service->image) {
+            // Xóa file ảnh vật lý cũ trong thư mục Storage để tránh nặng bộ nhớ máy
+            if (!empty($service->image) && Storage::disk('public')->exists($service->image)) {
                 Storage::disk('public')->delete($service->image);
             }
-            $data['image'] = $request->file('image')->store('services', 'public');
+            if (!empty($service->hinh_anh) && Storage::disk('public')->exists($service->hinh_anh)) {
+                Storage::disk('public')->delete($service->hinh_anh);
+            }
+
+            $imagePath = $request->file('image')->store('services', 'public');
+            $data['image'] = $imagePath;
+            $data['hinh_anh'] = $imagePath;
         }
 
         $service->update($data);
@@ -112,8 +135,12 @@ class ServiceController extends Controller
     {
         $service = Service::findOrFail($id);
         
-        if ($service->image) {
+        // Xóa ảnh cũ trước khi xóa hàng trong database
+        if (!empty($service->image) && Storage::disk('public')->exists($service->image)) {
             Storage::disk('public')->delete($service->image);
+        }
+        if (!empty($service->hinh_anh) && Storage::disk('public')->exists($service->hinh_anh)) {
+            Storage::disk('public')->delete($service->hinh_anh);
         }
         
         $service->delete();

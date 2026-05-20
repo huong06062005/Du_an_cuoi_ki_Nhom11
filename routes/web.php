@@ -1,45 +1,69 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\Client\HomeController;
 use App\Http\Controllers\Client\ComboController;
 use App\Http\Controllers\Client\BookingController;
-use App\Http\Controllers\Admin\OrderController;
+use App\Http\Controllers\Admin\AdminController;
+use App\Http\Controllers\Admin\ServiceController;
+use App\Http\Controllers\Admin\ComboManageController;
+use App\Http\Controllers\Admin\BookingManageController;
 
 /*
 |--------------------------------------------------------------------------
-| Web Routes - Tuyến đường hiển thị Web
+| 1. NHÓM PUBLIC (Ai cũng truy cập được)
 |--------------------------------------------------------------------------
 */
 
-// 1. Trang chủ công cộng
+// Trang chủ và xem danh sách, chi tiết Combo
 Route::get('/', [HomeController::class, 'index'])->name('home');
+Route::get('/combos', [ComboController::class, 'index'])->name('combos.index'); 
+Route::get('/combos/{id}', [ComboController::class, 'show'])->name('combos.show');
 
-// 2. Toàn bộ khu vực dành riêng cho Giao diện Khách hàng (Client)
-Route::prefix('client')->name('client.')->group(function () {
+// Hệ thống xác thực tài khoản
+Route::controller(AuthController::class)->group(function () {
+    Route::get('/login', 'showLogin')->name('login');
+    Route::post('/login', 'login');
+    Route::get('/register', 'showRegister')->name('register');
+    Route::post('/register', 'register');
     
-    // Tuyến đường xem chi tiết từng Combo
-    Route::get('/combos/{id}', [ComboController::class, 'show'])->name('combos.show');
-    
-    // --- LUỒNG BOOKING (ĐẶT TOUR) ---
-    // Hiển thị form đặt hàng
-    Route::get('/booking/{combo_id}', [BookingController::class, 'create'])->name('booking.create');
-    
-    // Xử lý lưu đơn hàng khi bấm gửi form
-    Route::post('/booking/{combo_id}', [BookingController::class, 'store'])->name('booking.store');
-    
+    // Sử dụng match để chấp nhận cả phương thức GET và POST khi Đăng xuất, tránh lỗi giao diện sidebar
+    Route::match(['get', 'post'], '/logout', 'logout')->name('logout'); 
 });
 
-// 3. Khu vực dành riêng cho Quản lý (Admin) - Cần duyệt đơn hàng
-Route::prefix('admin')->name('admin.')->group(function () {
+
+/*
+|--------------------------------------------------------------------------
+| 2. NHÓM CLIENT (Yêu cầu phải đăng nhập)
+|--------------------------------------------------------------------------
+*/
+Route::middleware(['auth'])->group(function () {
+    Route::get('/booking/{combo_id}', [BookingController::class, 'create'])->name('booking.create');
+    Route::post('/booking/store', [BookingController::class, 'store'])->name('booking.store');
+    Route::get('/my-bookings', [BookingController::class, 'history'])->name('booking.history');
+});
+
+
+/*
+|--------------------------------------------------------------------------
+| 3. NHÓM ADMIN (Quản trị hệ thống)
+|--------------------------------------------------------------------------
+*/
+Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
     
-    // Trang danh sách toàn bộ đơn hàng khách đã đặt
-    Route::get('/orders', [OrderController::class, 'index'])->name('orders.index');
-    
-    // Route xử lý khi Admin bấm nút "Duyệt đơn"
-    Route::post('/orders/{id}/approve', [OrderController::class, 'approve'])->name('orders.approve');
-    
-    // Route xử lý khi Admin bấm nút "Hủy đơn"
-    Route::post('/orders/{id}/cancel', [OrderController::class, 'cancel'])->name('orders.cancel');
-    
+    // Giao diện chính Dashboard (Thống kê số liệu tổng quan)
+    Route::get('/dashboard', [AdminController::class, 'dashboard'])->name('dashboard');
+
+    // Các cụm chức năng quản lý danh mục (CRUD Services & Combos)
+    Route::resource('services', ServiceController::class); 
+    Route::resource('combos', ComboManageController::class);
+
+    // Quản lý Đơn hàng (Hỗ trợ alias cả orders và bookings để giải quyết lỗi Route not defined ở Sidebar/Dashboard)
+    Route::get('/orders', [BookingManageController::class, 'index'])->name('orders.index');
+    Route::get('/bookings', [BookingManageController::class, 'index'])->name('bookings.index'); 
+    Route::patch('/orders/{id}/status', [BookingManageController::class, 'updateStatus'])->name('orders.update');
+
+    // Quản lý danh sách thành viên/khách hàng
+    Route::get('/users', [AdminController::class, 'users'])->name('users.index');
 });

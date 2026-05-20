@@ -1,5 +1,4 @@
-@extends('admin.layout.admin')
-
+@extends('admin.layouts.admin')
 @section('title', 'CHỈNH SỬA COMBO')
 
 @section('admin_content')

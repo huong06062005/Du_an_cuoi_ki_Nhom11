@@ -34,12 +34,17 @@ class ServiceController extends Controller
     public function store(Request $request)
     {
         // 1. Validation nghiêm ngặt dữ liệu đầu vào từ form
+        // Đã sửa đổi: Mở rộng phân loại 'type' bao gồm cả car và ticket để khớp 100% với thẻ <select> ngoài giao diện Form
         $request->validate([
             'name' => 'required|string|max:255',
-            'type' => 'required|in:flight,hotel,attraction,transport', // Bắt buộc chọn đúng phân loại
+            'type' => 'required|in:flight,hotel,attraction,transport,car,ticket', 
             'price' => 'required|numeric|min:0',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048', // Bổ sung thêm đuôi webp phổ biến
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048', 
             'mo_ta_chi_tiet' => 'nullable|string'
+        ], [
+            'name.required' => 'Vui lòng không để trống tên dịch vụ!',
+            'price.required' => 'Vui lòng nhập giá tiền gốc!',
+            'type.required' => 'Vui lòng chọn phân loại dịch vụ thành phần!',
         ]);
 
         // 2. Gom dữ liệu cơ bản (Gồm cả phương án tiếng Anh và tiếng Việt dự phòng)
@@ -52,18 +57,21 @@ class ServiceController extends Controller
             
             'price'          => $request->price,
             'gia_tien'       => $request->price,
+            'gia_goc'        => $request->price,
             
             'mo_ta'          => $request->mo_ta_chi_tiet, 
             'mo_ta_chi_tiet' => $request->mo_ta_chi_tiet, 
+            'provider'       => $request->provider ?? 'VIETTRAVEL',
+            'status'         => 'available'
         ];
 
         // 3. Xử lý upload hình ảnh dịch vụ nếu có
         if ($request->hasFile('image')) {
             $imagePath = $request->file('image')->store('services', 'public');
-            $rawFormInputs['image']     = $imagePath;
+            $rawFormInputs['image']      = $imagePath;
             $rawFormInputs['image_path']= $imagePath;
             $rawFormInputs['hinh_anh']  = $imagePath;
-            $rawFormInputs['hinnh_anh'] = $imagePath; // Sửa lỗi viết sai chính tả tiêu đề phòng hờ
+            $rawFormInputs['hinnh_anh'] = $imagePath; 
         }
 
         // 4. BỘ LỌC THÔNG MINH: Tự động giữ lại các trường có thật trong MySQL của em, loại bỏ trường thừa gây crash lỗi
@@ -93,12 +101,16 @@ class ServiceController extends Controller
     {
         $service = Service::findOrFail($id);
 
+        // Đã sửa đổi: Mở rộng phân loại 'type' cho đồng bộ với hàm store
         $request->validate([
             'name' => 'required|string|max:255',
-            'type' => 'required|in:flight,hotel,attraction,transport',
+            'type' => 'required|in:flight,hotel,attraction,transport,car,ticket',
             'price' => 'required|numeric|min:0',
             'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'mo_ta_chi_tiet' => 'nullable|string'
+        ], [
+            'name.required' => 'Tên dịch vụ không được để trống!',
+            'price.required' => 'Giá tiền không được để trống!',
         ]);
 
         $rawFormInputs = [
@@ -110,9 +122,12 @@ class ServiceController extends Controller
             
             'price'          => $request->price,
             'gia_tien'       => $request->price,
+            'gia_goc'        => $request->price,
             
             'mo_ta'          => $request->mo_ta_chi_tiet,
             'mo_ta_chi_tiet' => $request->mo_ta_chi_tiet,
+            'provider'       => $request->provider ?? 'VIETTRAVEL',
+            'status'         => $request->status ?? 'available'
         ];
 
         // Xử lý thay thế ảnh cũ nếu có upload ảnh mới
@@ -127,7 +142,7 @@ class ServiceController extends Controller
             }
 
             $imagePath = $request->file('image')->store('services', 'public');
-            $rawFormInputs['image']     = $imagePath;
+            $rawFormInputs['image']      = $imagePath;
             $rawFormInputs['image_path']= $imagePath;
             $rawFormInputs['hinh_anh']  = $imagePath;
             $rawFormInputs['hinnh_anh'] = $imagePath;

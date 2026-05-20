@@ -42,15 +42,19 @@
                     </td>
                     
                     <td class="p-4">
-                        <div class="font-bold text-slate-800 text-base">{{ $item->name ?? $item->ten_combo ?? 'Chưa đặt tên' }}</div>
+                        <div class="font-bold text-slate-800 text-base">{{ $item->name ?? ($item->ten_combo ?? 'Chưa đặt tên') }}</div>
                         <div class="text-xs text-slate-400 mt-1 line-clamp-1 italic max-w-xl">
-                            {{ $item->description ?? $item->mo_ta ?? 'Chưa có mô tả ngắn gọn cho gói combo này.' }}
+                            {{ $item->description ?? ($item->mo_ta ?? 'Chưa có mô tả ngắn gọn cho gói combo này.') }}
                         </div>
                     </td>
                     
                     <td class="p-4">
                         <span class="text-blue-600 font-bold text-base bg-blue-50/60 px-3 py-1.5 rounded-lg border border-blue-100/50 inline-block">
-                            {{ number_format($item->price ?? $item->gia_tien ?? 0) }}đ
+                            @php
+                                // ĐÃ SỬA: Ưu tiên lấy thuộc tính ảo real_price đã cấu hình tự động tính tổng tiền ở Model Combo
+                                $displayPrice = $item->real_price ?? ($item->price ?? ($item->gia_tien ?? 0));
+                            @endphp
+                            {{ $displayPrice > 0 ? number_format($displayPrice, 0, ',', '.') . 'đ' : '0đ' }}
                         </span>
                     </td>
                     

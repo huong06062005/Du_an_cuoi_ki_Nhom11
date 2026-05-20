@@ -41,7 +41,13 @@ class ComboManageController extends Controller
             $hinh_anh_path = $request->hinh_anh_url;
         }
 
-        $priceColumn = Schema::hasColumn('services', 'price') ? 'price' : 'gia_tien';
+        // ĐÃ SỬA: Quét thông minh qua tất cả các trường tiền tệ để tính tổng chính xác nhất
+        $priceColumn = 'price';
+        if (Schema::hasColumn('services', 'price')) $priceColumn = 'price';
+        elseif (Schema::hasColumn('services', 'gia_tien')) $priceColumn = 'gia_tien';
+        elseif (Schema::hasColumn('services', 'gia_nhap')) $priceColumn = 'gia_nhap';
+        elseif (Schema::hasColumn('services', 'gia_goc')) $priceColumn = 'gia_goc';
+
         $totalPrice = Service::whereIn('id', $request->services)->sum($priceColumn);
 
         $insertData = [
@@ -57,9 +63,14 @@ class ComboManageController extends Controller
             'trang_thai'  => 1,
         ];
 
+        // Lọc bớt cột thừa không có trong bảng combos để không bị crash sql
+        $safeInsertData = array_filter($insertData, function ($key) {
+            return Schema::hasColumn('combos', $key);
+        }, ARRAY_FILTER_USE_KEY);
+
         DB::beginTransaction();
         try {
-            $combo = Combo::create($insertData);
+            $combo = Combo::create($safeInsertData);
             $combo->services()->attach($request->services);
             DB::commit();
             return redirect()->route('admin.combos.index')->with('success', 'Tạo combo thành công!');
@@ -71,6 +82,7 @@ class ComboManageController extends Controller
 
     public function edit($id)
     {
+        // Đồng bộ nạp sẵn eagar load relation để View không bị tính toán lại
         $combo = Combo::with('services')->findOrFail($id);
         $services = Service::all();
         return view('admin.combos.edit', compact('combo', 'services'));
@@ -88,10 +100,15 @@ class ComboManageController extends Controller
             'hinh_anh_url' => 'nullable|url'
         ]);
 
-        $priceColumn = Schema::hasColumn('services', 'price') ? 'price' : 'gia_tien';
+        // ĐÃ SỬA: Đồng bộ bộ lọc quét trường tiền tệ cho hàm update
+        $priceColumn = 'price';
+        if (Schema::hasColumn('services', 'price')) $priceColumn = 'price';
+        elseif (Schema::hasColumn('services', 'gia_tien')) $priceColumn = 'gia_tien';
+        elseif (Schema::hasColumn('services', 'gia_nhap')) $priceColumn = 'gia_nhap';
+        elseif (Schema::hasColumn('services', 'gia_goc')) $priceColumn = 'gia_goc';
+
         $totalPrice = Service::whereIn('id', $request->services)->sum($priceColumn);
 
-        // Mảng cập nhật: Luôn lấy giá trị cũ trước
         $updateData = [
             'name'        => $request->ten_combo,
             'ten_combo'   => $request->ten_combo,
@@ -101,7 +118,6 @@ class ComboManageController extends Controller
             'gia_tien'    => $totalPrice,
         ];
 
-        // Xử lý ảnh: Chỉ thay đổi nếu có upload hoặc link mới
         $newImagePath = null;
         if ($request->hasFile('hinh_anh')) {
             $newImagePath = $request->file('hinh_anh')->store('combos', 'public');
@@ -114,15 +130,17 @@ class ComboManageController extends Controller
             $updateData['hinh_anh'] = $newImagePath;
         }
 
+        $safeUpdateData = array_filter($updateData, function ($key) {
+            return Schema::hasColumn('combos', $key);
+        }, ARRAY_FILTER_USE_KEY);
+
         DB::beginTransaction();
         try {
-            // Lưu ảnh cũ để xóa sau nếu cần
             $oldImage = $combo->image ?? $combo->hinh_anh;
 
-            $combo->update($updateData);
+            $combo->update($safeUpdateData);
             $combo->services()->sync($request->services);
 
-            // Chỉ xóa ảnh cũ nếu có ảnh mới và ảnh cũ là file local (không phải link)
             if ($newImagePath && $oldImage && !filter_var($oldImage, FILTER_VALIDATE_URL)) {
                 if (Storage::disk('public')->exists($oldImage)) {
                     Storage::disk('public')->delete($oldImage);

@@ -39,7 +39,7 @@
                 <div>
                     <label class="block text-xs font-bold text-slate-500 uppercase mb-2 tracking-wide">Hình ảnh hiện tại</label>
                     <div class="p-1 bg-white border border-slate-200 rounded-xl shadow-inner">
-                        <img src="{{ $combo->image_url }}" class="w-full h-36 object-cover rounded-lg border border-slate-100">
+                        <img src="{{ $combo->image_url ?? ($combo->image ?? ($combo->hinh_anh ?? '')) }}" class="w-full h-36 object-cover rounded-lg border border-slate-100">
                     </div>
                 </div>
                 <div class="flex flex-col justify-center space-y-3">
@@ -57,7 +57,7 @@
 
             <div>
                 <label class="block text-xs font-bold text-slate-500 uppercase mb-1 tracking-wide">Giá Combo dự kiến (VNĐ)</label>
-                <input type="number" id="total-price-input" name="gia_tien" value="{{ old('gia_tien', $combo->gia_tien ?? $combo->price ?? 0) }}" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 outline-none bg-slate-100 text-slate-600 font-bold shadow-sm" readonly>
+                <input type="number" id="total-price-input" name="gia_tien" value="{{ old('gia_tien', $combo->gia_tien ?? ($combo->price ?? 0)) }}" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 outline-none bg-slate-100 text-slate-600 font-bold shadow-sm" readonly>
                 <p class="text-[11px] text-slate-400 mt-1 italic">* Giá tiền tự động tính dựa theo các dịch vụ thành phần được tích chọn bên dưới.</p>
             </div>
 
@@ -66,16 +66,23 @@
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 bg-slate-50/70 rounded-xl border border-slate-200 shadow-inner">
                     @forelse($services as $service)
                     @php
-                        $servicePrice = $service->gia_tien ?? $service->price ?? 0;
-                        $serviceName = $service->name ?? $service->ten_dich_vu ?? 'Chưa đặt tên';
-                        // Kiểm tra xem dịch vụ này đã có trong combo này từ trước chưa để tự động tích chọn
-                        $isAttached = $combo->services->contains($service->id);
+                        // ĐÃ SỬA: Quét triệt để tất cả các tên cột có thể có trong database Laragon của nhóm em
+                        $servicePrice = $service->price ?? ($service->gia_tien ?? ($service->gia_nhap ?? ($service->gia_goc ?? 0)));
+                        $serviceName = $service->name ?? ($service->ten_dich_vu ?? 'Chưa đặt tên');
+                        
+                        // Kiểm tra an toàn quan hệ Many-to-Many cho cả hai phương án đặt tên hàm
+                        $isAttached = false;
+                        if (isset($combo->services)) {
+                            $isAttached = $combo->services->contains($service->id);
+                        } elseif (isset($combo->dichVus)) {
+                            $isAttached = $combo->dichVus->contains($service->id);
+                        }
                     @endphp
                     <label class="flex items-center space-x-3 p-3 bg-white rounded-xl shadow-sm border border-slate-100 cursor-pointer hover:border-blue-400 hover:shadow transition-all">
                         <input type="checkbox" name="services[]" value="{{ $service->id }}" data-price="{{ $servicePrice }}" class="service-checkbox rounded text-blue-600 focus:ring-blue-500 w-4 h-4 border-slate-300" {{ $isAttached ? 'checked' : '' }}>
                         <div class="text-sm">
                             <span class="font-bold text-slate-800 block">{{ $serviceName }}</span>
-                            <span class="text-blue-600 text-xs font-semibold">{{ number_format($servicePrice) }}đ</span>
+                            <span class="text-blue-600 text-xs font-semibold">{{ number_format($servicePrice, 0, ',', '.') }}đ</span>
                         </div>
                     </label>
                     @empty
@@ -95,7 +102,7 @@
         </div>
 
         <div class="flex space-x-4 mt-10 pt-4 border-t border-slate-100">
-            <button type="submit" class="flex-1 bg-blue-600 text-white py-3.5 rounded-xl font-bold hover:bg-blue-700 shadow-md shadow-blue-100 transition-all uppercase tracking-widest text-sm">
+            <button type="submit" class="flex-1 bg-blue-600 text-white py-3.5 rounded-xl font-bold hover:bg-blue-700 shadow-md shadow-blue-100 transition-all uppercase tracking-widest text-sm cursor-pointer">
                 <i class="fas fa-save mr-1"></i> Cập nhật thay đổi
             </button>
             <a href="{{ route('admin.combos.index') }}" class="flex-1 bg-slate-100 text-slate-600 py-3.5 rounded-xl font-bold text-center hover:bg-slate-200 transition-all uppercase tracking-widest text-sm">

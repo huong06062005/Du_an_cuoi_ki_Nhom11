@@ -8,10 +8,10 @@
     <p class="text-sm text-slate-500 italic">Cập nhật dữ liệu hệ thống tính đến ngày {{ date('d/m/Y') }}</p>
 </div>
 
-{{-- Các khối thống kê - ĐÃ BỔ SUNG LINK ĐỂ CLICK ẤN VÀO ĐƯỢC --}}
+{{-- Các khối thống kê kết nối trực tiếp dữ liệu Controller --}}
 <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-10">
     
-    <a href="{{ Route::has('admin.bookings.index') ? route('admin.bookings.index') : '#' }}" class="block transition-transform hover:-translate-y-1">
+    <a href="{{ Route::has('admin.bookings.index') ? route('admin.bookings.index') : (Route::has('admin.orders.index') ? route('admin.orders.index') : '#') }}" class="block transition-transform hover:-translate-y-1">
         <div class="bg-gradient-to-br from-blue-600 to-blue-700 p-6 rounded-2xl shadow-lg shadow-blue-200 text-white h-full">
             <div class="flex justify-between items-start">
                 <div>
@@ -26,7 +26,7 @@
         </div>
     </a>
 
-    <a href="{{ Route::has('admin.bookings.index') ? route('admin.bookings.index') : '#' }}" class="block transition-transform hover:-translate-y-1">
+    <a href="{{ Route::has('admin.bookings.index') ? route('admin.bookings.index') : (Route::has('admin.orders.index') ? route('admin.orders.index') : '#') }}" class="block transition-transform hover:-translate-y-1">
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 h-full hover:border-emerald-200">
             <div class="flex justify-between items-start">
                 <div>
@@ -56,7 +56,7 @@
         </div>
     </a>
 
-    <a href="{{ Route::has('admin.users') ? route('admin.users') : '#' }}" class="block transition-transform hover:-translate-y-1">
+    <a href="{{ Route::has('admin.users.index') ? route('admin.users.index') : '#' }}" class="block transition-transform hover:-translate-y-1">
         <div class="bg-white p-6 rounded-2xl shadow-sm border border-slate-100 h-full hover:border-purple-200">
             <div class="flex justify-between items-start">
                 <div>
@@ -73,15 +73,14 @@
 </div>
 
 <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+    {{-- Khối danh sách giao dịch --}}
     <div class="lg:col-span-2 bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
         <div class="flex justify-between items-center mb-6">
             <h4 class="font-bold text-slate-800 uppercase text-sm tracking-widest">Giao dịch gần đây</h4>
-            {{-- Tự động trỏ liên kết đến danh sách đơn hàng của hệ thống --}}
-            <a href="{{ Route::has('admin.bookings.index') ? route('admin.bookings.index') : '#' }}" class="text-xs text-blue-600 font-bold hover:underline">Xem tất cả</a>
+            <a href="{{ Route::has('admin.bookings.index') ? route('admin.bookings.index') : (Route::has('admin.orders.index') ? route('admin.orders.index') : '#') }}" class="text-xs text-blue-600 font-bold hover:underline">Xem tất cả</a>
         </div>
         
         <div class="space-y-4">
-            {{-- Kiểm tra nếu có đơn hàng mới hiện, nếu không sẽ hiện thông báo trống --}}
             @if(isset($recent_orders) && count($recent_orders) > 0)
                 @foreach($recent_orders as $order)
                 <div class="flex items-center justify-between p-4 bg-slate-50 rounded-xl">
@@ -111,41 +110,53 @@
         </div>
     </div>
 
-    {{-- Trạng thái dịch vụ --}}
+    {{-- THAY THẾ MỚI TẠI ĐÂY: Khối thống kê tỷ lệ trạng thái đơn đặt Combo du lịch thực tế --}}
     <div class="bg-white rounded-2xl shadow-sm border border-slate-100 p-6">
-        <h4 class="font-bold text-slate-800 uppercase text-sm tracking-widest mb-6">Trạng thái hệ thống</h4>
+        <h4 class="font-bold text-slate-800 uppercase text-sm tracking-widest mb-6">Trạng thái đơn hàng</h4>
         <div class="space-y-6">
+            
+            {{-- Đơn đã xác nhận thành công --}}
             <div>
                 <div class="flex justify-between text-xs mb-2">
-                    <span class="font-bold text-slate-500 uppercase">Khách sạn đối tác</span>
-                    <span class="text-slate-800 font-bold">100%</span>
+                    <span class="font-bold text-slate-500 uppercase">Đã xác nhận / Hoàn thành</span>
+                    <span class="text-emerald-600 font-bold">{{ $confirmedPercentage ?? 0 }}%</span>
                 </div>
                 <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                    <div class="bg-blue-600 h-full w-[100%]"></div>
+                    <div class="bg-emerald-500 h-full transition-all duration-500" style="width: {{ $confirmedPercentage ?? 0 }}%"></div>
                 </div>
             </div>
+
+            {{-- Đơn đang chờ xử lý --}}
             <div>
                 <div class="flex justify-between text-xs mb-2">
-                    <span class="font-bold text-slate-500 uppercase">Vé máy bay</span>
-                    <span class="text-slate-800 font-bold">95%</span>
+                    <span class="font-bold text-slate-500 uppercase">Đang chờ phê duyệt</span>
+                    <span class="text-amber-600 font-bold">{{ $pendingPercentage ?? 0 }}%</span>
                 </div>
                 <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                    <div class="bg-emerald-500 h-full w-[95%]"></div>
+                    <div class="bg-amber-500 h-full transition-all duration-500" style="width: {{ $pendingPercentage ?? 0 }}%"></div>
                 </div>
             </div>
+
+            {{-- Đơn bị hủy --}}
             <div>
                 <div class="flex justify-between text-xs mb-2">
-                    <span class="font-bold text-slate-500 uppercase">Phản hồi khách hàng</span>
-                    <span class="text-slate-800 font-bold">45%</span>
+                    <span class="font-bold text-slate-500 uppercase">Yêu cầu hủy đơn</span>
+                    <span class="text-red-600 font-bold">{{ $cancelledPercentage ?? 0 }}%</span>
                 </div>
                 <div class="w-full bg-slate-100 h-2 rounded-full overflow-hidden">
-                    <div class="bg-amber-500 h-full w-[45%]"></div>
+                    <div class="bg-red-500 h-full transition-all duration-500" style="width: {{ $cancelledPercentage ?? 0 }}%"></div>
                 </div>
             </div>
+
         </div>
         <div class="mt-10 bg-slate-900 rounded-xl p-4 text-center">
-            <p class="text-white text-[10px] font-bold tracking-widest uppercase">Máy chủ hoạt động ổn định</p>
+            <p class="text-white text-[10px] font-bold tracking-widest uppercase">Thống kê đơn đặt trực tuyến</p>
         </div>
     </div>
 </div>
+
+@php
+    // Day la file giao dien Dashboard thong ke, da dong bo voi cac bien phan tram don hang thuc te tu AdminController
+@endphp
+
 @endsection

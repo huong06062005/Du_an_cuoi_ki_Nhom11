@@ -48,12 +48,33 @@ class AdminController extends Controller
             $totalUsers = User::count(); 
         }
 
+        // --- CẬP NHẬT MỚI: XỬ LÝ LOGIC THỐNG KÊ PHẦN TRĂM THEO TRẠNG THÁI ĐƠN HÀNG ---
+        if ($totalBookings > 0) {
+            // Đếm số lượng đơn hàng theo từng trạng thái trong MySQL
+            $confirmedCount = Booking::where('status', 'confirmed')->count();
+            $pendingCount = Booking::where('status', 'pending')->count();
+            $cancelledCount = Booking::where('status', 'cancelled')->count();
+
+            // Tính toán tỷ lệ phần trăm (Làm tròn bằng hàm round)
+            $confirmedPercentage = round(($confirmedCount / $totalBookings) * 100);
+            $pendingPercentage = round(($pendingCount / $totalBookings) * 100);
+            $cancelledPercentage = round(($cancelledCount / $totalBookings) * 100);
+        } else {
+            // Thiết lập giá trị mặc định nếu hệ thống mới reset và chưa có đơn hàng nào
+            $confirmedPercentage = 0;
+            $pendingPercentage = 0;
+            $cancelledPercentage = 0;
+        }
+
         // Trả về view admin/dashboard.blade.php kèm dữ liệu số liệu
         return view('admin.dashboard', compact(
             'totalCombos', 
             'totalBookings', 
             'totalRevenue', 
-            'totalUsers'
+            'totalUsers',
+            'confirmedPercentage', // Truyền biến dữ liệu thật sang view
+            'pendingPercentage',   // Truyền biến dữ liệu thật sang view
+            'cancelledPercentage'  // Truyền biến dữ liệu thật sang view
         ));
     }
 
@@ -63,7 +84,11 @@ class AdminController extends Controller
     public function users()
     {
         // Lấy danh sách user, xếp mới nhất lên đầu
-        $users = User::latest()->get();
+        try {
+            $users = User::where('role', 'user')->latest()->get();
+        } catch (\Exception $e) {
+            $users = User::latest()->get();
+        }
 
         return view('admin.users.index', compact('users'));
     }

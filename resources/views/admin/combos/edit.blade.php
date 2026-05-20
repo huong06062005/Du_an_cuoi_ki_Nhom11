@@ -26,15 +26,29 @@
         @csrf
         @method('PUT')
         
-        <h2 class="text-lg font-bold text-slate-800 mb-6 uppercase border-l-4 border-blue-600 pl-4">Cập nhật thông tin mã hiệu #{{ $combo->id }}</h2>
+        <h2 class="text-lg font-bold text-slate-800 mb-6 uppercase border-l-4 border-blue-600 pl-4">Cập nhật thông tin combo </h2>
 
         <div class="space-y-6">
+            {{-- 1. Ô Nhập Tên Combo --}}
             <div>
                 <label class="block text-xs font-bold text-slate-500 uppercase mb-1 tracking-wide">Tên Combo du lịch</label>
                 <input type="text" name="ten_combo" value="{{ old('ten_combo', $combo->ten_combo ?? $combo->name) }}" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 outline-none font-semibold focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all shadow-sm" required>
                 @error('ten_combo') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
             </div>
 
+            {{-- THÊM MỚI: Ô Checkbox cấu hình Combo Phổ biến / Nổi bật --}}
+            <div class="p-4 bg-amber-50 rounded-2xl border border-amber-200 flex items-center space-x-3 cursor-pointer shadow-sm">
+                @php
+                    // Kiểm tra an toàn xem DB đang dùng cột is_featured hay noi_bat
+                    $isFeatured = $combo->is_featured ?? ($combo->noi_bat ?? 0);
+                @endphp
+                <input type="checkbox" name="is_featured" value="1" id="is_featured_input" class="rounded text-amber-600 focus:ring-amber-500 w-5 h-5 border-slate-300 cursor-pointer" {{ $isFeatured == 1 ? 'checked' : '' }}>
+                <label for="is_featured_input" class="text-xs font-bold text-slate-700 uppercase tracking-wide cursor-pointer select-none">
+                    🔥 Đánh dấu đây là Combo phổ biến
+                </label>
+            </div>
+
+            {{-- 2. Khối Quản Lý Hình Ảnh --}}
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6 p-4 bg-slate-50 rounded-2xl border border-slate-200">
                 <div>
                     <label class="block text-xs font-bold text-slate-500 uppercase mb-2 tracking-wide">Hình ảnh hiện tại</label>
@@ -55,22 +69,22 @@
                 </div>
             </div>
 
+            {{-- 3. Ô Hiển Thị Tổng Giá Tiền --}}
             <div>
                 <label class="block text-xs font-bold text-slate-500 uppercase mb-1 tracking-wide">Giá Combo dự kiến (VNĐ)</label>
                 <input type="number" id="total-price-input" name="gia_tien" value="{{ old('gia_tien', $combo->gia_tien ?? ($combo->price ?? 0)) }}" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 outline-none bg-slate-100 text-slate-600 font-bold shadow-sm" readonly>
                 <p class="text-[11px] text-slate-400 mt-1 italic">* Giá tiền tự động tính dựa theo các dịch vụ thành phần được tích chọn bên dưới.</p>
             </div>
 
+            {{-- 4. Danh Sách Dịch Vụ Thành Phần --}}
             <div>
                 <label class="block text-xs font-bold text-slate-500 uppercase mb-2 tracking-wide">Các dịch vụ bao gồm trong Combo</label>
                 <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 p-4 bg-slate-50/70 rounded-xl border border-slate-200 shadow-inner">
                     @forelse($services as $service)
                     @php
-                        // ĐÃ SỬA: Quét triệt để tất cả các tên cột có thể có trong database Laragon của nhóm em
                         $servicePrice = $service->price ?? ($service->gia_tien ?? ($service->gia_nhap ?? ($service->gia_goc ?? 0)));
                         $serviceName = $service->name ?? ($service->ten_dich_vu ?? 'Chưa đặt tên');
                         
-                        // Kiểm tra an toàn quan hệ Many-to-Many cho cả hai phương án đặt tên hàm
                         $isAttached = false;
                         if (isset($combo->services)) {
                             $isAttached = $combo->services->contains($service->id);
@@ -94,6 +108,7 @@
                 @error('services') <p class="text-red-500 text-xs mt-1">{{ $message }}</p> @enderror
             </div>
 
+            {{-- 5. Ô Mô Tả Ngắn --}}
             <div>
                 <label class="block text-xs font-bold text-slate-500 uppercase mb-1 tracking-wide">Mô tả ngắn gọn</label>
                 <textarea name="mo_ta" rows="4" class="w-full border border-slate-200 rounded-xl px-4 py-2.5 outline-none focus:ring-2 focus:ring-blue-500 transition-all shadow-sm" required>{{ old('mo_ta', $combo->mo_ta ?? $combo->description) }}</textarea>
@@ -101,6 +116,7 @@
             </div>
         </div>
 
+        {{-- Khối Nút Lưu Thay Đổi --}}
         <div class="flex space-x-4 mt-10 pt-4 border-t border-slate-100">
             <button type="submit" class="flex-1 bg-blue-600 text-white py-3.5 rounded-xl font-bold hover:bg-blue-700 shadow-md shadow-blue-100 transition-all uppercase tracking-widest text-sm cursor-pointer">
                 <i class="fas fa-save mr-1"></i> Cập nhật thay đổi
@@ -131,7 +147,6 @@
             checkbox.addEventListener('change', calculateTotal);
         });
 
-        // Chạy tính toán giá tiền mặc định ban đầu dựa trên những dịch vụ đã chọn sẵn
         calculateTotal();
     });
 </script>

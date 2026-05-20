@@ -41,7 +41,6 @@ class ComboManageController extends Controller
             $hinh_anh_path = $request->hinh_anh_url;
         }
 
-        // ĐÃ SỬA: Quét thông minh qua tất cả các trường tiền tệ để tính tổng chính xác nhất
         $priceColumn = 'price';
         if (Schema::hasColumn('services', 'price')) $priceColumn = 'price';
         elseif (Schema::hasColumn('services', 'gia_tien')) $priceColumn = 'gia_tien';
@@ -50,20 +49,24 @@ class ComboManageController extends Controller
 
         $totalPrice = Service::whereIn('id', $request->services)->sum($priceColumn);
 
+        // ĐÃ CẬP NHẬT: Nhận giá trị trạng thái từ checkbox "is_featured" gửi lên
+        $isFeaturedValue = $request->has('is_featured') ? 1 : 0;
+
         $insertData = [
-            'name'        => $request->ten_combo,
-            'ten_combo'   => $request->ten_combo,
-            'description' => $request->mo_ta,
-            'mo_ta'       => $request->mo_ta,
-            'image'       => $hinh_anh_path,
-            'hinh_anh'    => $hinh_anh_path,
-            'price'       => $totalPrice,
-            'gia_tien'    => $totalPrice,
-            'status'      => 1,
-            'trang_thai'  => 1,
+            'name'         => $request->ten_combo,
+            'ten_combo'    => $request->ten_combo,
+            'description'  => $request->mo_ta,
+            'mo_ta'        => $request->mo_ta,
+            'image'        => $hinh_anh_path,
+            'hinh_anh'     => $hinh_anh_path,
+            'price'        => $totalPrice,
+            'gia_tien'     => $totalPrice,
+            'status'       => 1,
+            'trang_thai'   => 1,
+            'is_featured'  => $isFeaturedValue,
+            'noi_bat'      => $isFeaturedValue,
         ];
 
-        // Lọc bớt cột thừa không có trong bảng combos để không bị crash sql
         $safeInsertData = array_filter($insertData, function ($key) {
             return Schema::hasColumn('combos', $key);
         }, ARRAY_FILTER_USE_KEY);
@@ -82,7 +85,6 @@ class ComboManageController extends Controller
 
     public function edit($id)
     {
-        // Đồng bộ nạp sẵn eagar load relation để View không bị tính toán lại
         $combo = Combo::with('services')->findOrFail($id);
         $services = Service::all();
         return view('admin.combos.edit', compact('combo', 'services'));
@@ -100,7 +102,6 @@ class ComboManageController extends Controller
             'hinh_anh_url' => 'nullable|url'
         ]);
 
-        // ĐÃ SỬA: Đồng bộ bộ lọc quét trường tiền tệ cho hàm update
         $priceColumn = 'price';
         if (Schema::hasColumn('services', 'price')) $priceColumn = 'price';
         elseif (Schema::hasColumn('services', 'gia_tien')) $priceColumn = 'gia_tien';
@@ -109,13 +110,18 @@ class ComboManageController extends Controller
 
         $totalPrice = Service::whereIn('id', $request->services)->sum($priceColumn);
 
+        // ĐÃ CẬP NHẬT: Cập nhật trạng thái phổ biến khi Admin chỉnh sửa tích/bỏ tích
+        $isFeaturedValue = $request->has('is_featured') ? 1 : 0;
+
         $updateData = [
-            'name'        => $request->ten_combo,
-            'ten_combo'   => $request->ten_combo,
-            'description' => $request->mo_ta,
-            'mo_ta'       => $request->mo_ta,
-            'price'       => $totalPrice,
-            'gia_tien'    => $totalPrice,
+            'name'         => $request->ten_combo,
+            'ten_combo'    => $request->ten_combo,
+            'description'  => $request->mo_ta,
+            'mo_ta'        => $request->mo_ta,
+            'price'        => $totalPrice,
+            'gia_tien'     => $totalPrice,
+            'is_featured'  => $isFeaturedValue,
+            'noi_bat'      => $isFeaturedValue,
         ];
 
         $newImagePath = null;

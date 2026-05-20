@@ -14,7 +14,7 @@ class ComboSeeder extends Seeder
      */
     public function run(): void
     {
-        // Danh sách 15 combo có đầy đủ Giá (Gốc/Bán) và Link ảnh Unsplash thực tế theo địa danh
+        // Danh sách 15 combo chuẩn cú pháp PHP, không xuống dòng lỗi
         $combos = [
             // 🔥 6 COMBO PHỔ BIẾN / NỔI BẬT (is_featured = 1)
             [
@@ -22,7 +22,7 @@ class ComboSeeder extends Seeder
                 'price' => 3490000,
                 'old_price' => 4200000,
                 'description' => 'Gói combo trọn gói bao gồm vé máy bay khứ hồi, nghỉ dưỡng khách sạn Novotel view sông Hàn và vé vui chơi Bà Nà Hills check-in Cầu Vàng.',
-                'image' => 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=800&q=80', // Cầu Vàng Đà Nẵng
+                'image' => 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=800&q=80',
                 'is_featured' => 1,
                 'keyword' => 'Đà Nẵng'
             ],
@@ -31,7 +31,7 @@ class ComboSeeder extends Seeder
                 'price' => 1950000,
                 'old_price' => 2500000,
                 'description' => 'Trải nghiệm cáp treo Sun World Fansipan Legend, di chuyển xe giường nằm VIP khứ hồi và nghỉ dưỡng tại Hotel de la Coupole đẳng cấp Pháp.',
-                'image' => 'https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=800&q=80', // Ruộng bậc thang Sapa
+                'image' => 'https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=800&q=80',
                 'is_featured' => 1,
                 'keyword' => 'Sapa'
             ],
@@ -40,7 +40,7 @@ class ComboSeeder extends Seeder
                 'price' => 5850000,
                 'old_price' => 6900000,
                 'description' => 'Khám phá trọn vẹn đảo ngọc với vé máy bay khứ hồi, lưu trú Villa Vinpearl Resort & Spa và vé vui chơi không giới hạn VinWonders & Safari.',
-                'image' => 'https://images.unsplash.com/photo-1583212292454-1fe6229603b7?auto=format&fit=crop&w=800&q=80', // Biển Phú Quốc
+                'image' => 'https://images.unsplash.com/photo-1583212292454-1fe6229603b7?auto=format&fit=crop&w=800&q=80',
                 'is_featured' => 1,
                 'keyword' => 'Phú Quốc'
             ],
@@ -49,7 +49,7 @@ class ComboSeeder extends Seeder
                 'price' => 2650000,
                 'old_price' => 3200000,
                 'description' => 'Nghỉ dưỡng sang chảnh tại Mường Thanh Luxury Hạ Long, kết hợp hải trình 6 tiếng ăn buffet hải sản và chèo thuyền Kayak trên vịnh.',
-                'image' => 'https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?auto=format&fit=crop&w=800&q=80', // Vịnh Hạ Long
+                'image' => 'https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?auto=format&fit=crop&w=800&q=80',
                 'is_featured' => 1,
                 'keyword' => 'Hạ Long'
             ],
@@ -58,7 +58,7 @@ class ComboSeeder extends Seeder
                 'price' => 2200000,
                 'old_price' => 2700000,
                 'description' => 'Hành trình di chuyển Vietnam Airlines, lưu trú khách sạn Silk Path Grand Huế sang trọng và thưởng thức show diễn Ký ức Hội An.',
-                'image' => 'https://images.unsplash.com/photo-1571508601936-6ca847b47ae6?auto=format&fit=crop&w=800&q=80', // Đại Nội Huế
+                'image' => 'https://images.unsplash.com/photo-1571508601936-6ca847b47ae6?auto=format&fit=crop&w=800&q=80',
                 'is_featured' => 1,
                 'keyword' => 'Huế'
             ],
@@ -67,7 +67,7 @@ class ComboSeeder extends Seeder
                 'price' => 3100000,
                 'old_price' => 3800000,
                 'description' => 'Trải nghiệm xe giường nằm phòng đôi VIP Hà Nội - Hà Giang, thuê xe máy tự lái chinh phục đèo Mã Pì Lèng và sông Nho Quế.',
-                'image' => 'https://images.unsplash.com/photo-1605538032432-a9f0c8d9baac?auto=format&fit=crop&w=800&q=80', // Núi non Hà Giang
+                'image' => 'https://images.unsplash.com/photo-1605538032432-a9f0c8d9baac?auto=format&fit=crop&w=800&q=80',
                 'is_featured' => 1,
                 'keyword' => 'Hà Giang'
             ],
@@ -156,43 +156,38 @@ class ComboSeeder extends Seeder
             ],
         ];
 
+        $index = 0;
+
         foreach ($combos as $item) {
-            // Mapping trường thông minh để tương thích với cấu trúc DB thực tế của nhóm em
+            // Tự động set mặc định 6 combo đầu tiên luôn là phổ biến
+            $isFeaturedValue = ($index < 6 || $item['is_featured'] == 1) ? 1 : 0;
+
             $rawInputs = [
                 'name'         => $item['name'],
                 'ten_combo'    => $item['name'],
-                
                 'price'        => $item['price'],
                 'gia_tien'     => $item['price'],
                 'gia_ban'      => $item['price'],
-                
                 'old_price'    => $item['old_price'],
                 'gia_cu'       => $item['old_price'],
                 'gia_goc'      => $item['old_price'],
-                
                 'description'  => $item['description'],
                 'mo_ta'        => $item['description'],
-                
                 'image'        => $item['image'],
                 'anh'          => $item['image'],
                 'hinh_anh'     => $item['image'],
-                
-                'is_featured'  => $item['is_featured'],
-                'noi_bat'      => $item['is_featured'],
-                'pho_bien'     => $item['is_featured'],
-                
+                'is_featured'  => $isFeaturedValue,
+                'noi_bat'      => $isFeaturedValue,
+                'pho_bien'     => $isFeaturedValue,
                 'status'       => 'available'
             ];
 
-            // Loại bỏ các trường không tồn tại trong bảng combos
             $safeData = array_filter($rawInputs, function ($key) {
                 return Schema::hasColumn('combos', $key);
             }, ARRAY_FILTER_USE_KEY);
 
-            // Lưu dữ liệu vào bảng combos
             $combo = Combo::create($safeData);
 
-            // Tự động tìm ID dịch vụ thành phần ăn khớp với địa danh và liên kết sang bảng trung gian
             $relatedServiceIds = Service::where('name', 'LIKE', '%' . $item['keyword'] . '%')->pluck('id')->toArray();
             
             if (!empty($relatedServiceIds)) {
@@ -202,6 +197,8 @@ class ComboSeeder extends Seeder
                     $combo->dichVus()->attach($relatedServiceIds);
                 }
             }
+
+            $index++;
         }
     }
 }

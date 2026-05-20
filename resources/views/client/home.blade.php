@@ -39,7 +39,7 @@
         <div class="max-w-[1440px] mx-auto px-6"> 
             <div class="flex justify-between items-end mb-12">
                 <div>
-                    <h2 class="text-3xl font-black text-slate-900 uppercase">Gói Combo Phổ Biến</h2>
+                    <h2 class="text-3xl font-black text-slate-900 uppercase">Danh sách Gói Combo</h2>
                     <div class="h-1.5 w-20 bg-blue-600 mt-2 rounded-full"></div>
                 </div>
                 <a href="#" class="text-blue-600 font-bold text-sm hover:underline">Xem tất cả combo →</a>
@@ -50,13 +50,14 @@
                     <div class="bg-white rounded-[32px] overflow-hidden shadow-[0_10px_40px_rgba(0,0,0,0.04)] hover:shadow-[0_30px_70px_rgba(0,0,0,0.12)] transition-all duration-500 group border border-slate-100 flex flex-col h-full">
                         {{-- Phần Ảnh Đại Diện Combo --}}
                         <div class="relative h-80 overflow-hidden">
-                            {{-- ĐÃ SỬA: Gọi qua thuộc tính ảo $combo->image_url để tự động xử lý link ảnh Unsplash thông minh --}}
                             <img src="{{ $combo->image_url }}" alt="{{ $combo->name }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
                             
-                            {{-- Tag hiển thị Trạng thái Hot / Giảm giá nếu có --}}
-                            <div class="absolute top-6 left-6 bg-red-500 text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm">
-                                BÁN CHẠY 🔥
-                            </div>
+                            {{-- ĐÃ SỬA LỌC NHÃN: Chỉ hiển thị nhãn BÁN CHẠY khi combo đó được tích chọn là phổ biến trong Admin --}}
+                            @if(($combo->is_featured ?? 0) == 1 || ($combo->noi_bat ?? 0) == 1)
+                                <div class="absolute top-6 left-6 bg-red-500 text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm">
+                                    BÁN CHẠY 🔥
+                                </div>
+                            @endif
                         </div>
 
                         {{-- Phần Thông Tin Chi Tiết Gói --}}
@@ -70,15 +71,15 @@
                                 {{ $combo->mo_ta_text }}
                             </p>
 
-                            {{-- Khối Hiển Thị Giá Tiền (ĐÃ SỬA CHỐNG LỖI 0 VNĐ) --}}
+                            {{-- Khối Hiển Thị Giá Tiền (ĐÃ SỬA TRIỆT ĐỂ LỖI 0 VNĐ) --}}
                             <div class="mb-8">
                                 @php
-    // ĐÃ SỬA: Ép buộc lấy đúng cột total_price đang lưu tiền triệu trong Database của bạn
-    $currentPrice = $combo->total_price ?? 0;
-    
-    // Tự động tính giá cũ (gạch ngang) cao hơn giá gốc 25% làm hiệu ứng giảm giá cho đẹp mắt
-    $oldPrice = $currentPrice * 1.25;
-@endphp
+                                    // ĐÃ SỬA: Ưu tiên gọi real_price từ Model Combo để lấy giá từ bảng liên kết, phòng hờ thêm price và gia_tien
+                                    $currentPrice = $combo->real_price ?? ($combo->price ?? ($combo->gia_tien ?? 0));
+                                    
+                                    // Tự động tính giá cũ (gạch ngang) cao hơn giá gốc 25% làm hiệu ứng marketing giảm giá
+                                    $oldPrice = $combo->old_price ?? ($combo->gia_cu ?? ($currentPrice * 1.25));
+                                @endphp
                                 
                                 {{-- Giá cũ gạch ngang --}}
                                 <div class="text-slate-400 text-sm line-through font-medium mb-1">

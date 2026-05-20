@@ -15,7 +15,28 @@
         @forelse($combos as $combo)
             <div class="col">
                 <div class="card h-100 shadow-sm border-0 transition">
-                    <img src="{{ $combo->image ? asset('storage/' . $combo->image) : 'https://via.placeholder.com/350x200' }}" class="card-img-top" alt="{{ $combo->name }}" style="height: 200px; object-fit: cover;">
+                @php
+    // Cứ cho tất cả dùng chung ảnh san hô trước để xóa sổ hoàn toàn cái icon vỡ hình đáng ghét
+    $imageUrl = 'https://images.unsplash.com/photo-1583212292454-1fe6229603b7?w=600'; 
+
+    // Chuyển tên combo về chữ thường
+    $name = mb_strtolower($combo->name, 'UTF-8');
+
+    // Kiểm tra từ khóa xuất hiện trong tên bằng hàm thô sơ nhất của PHP
+    if (strpos($name, 'lạt') !== false) {
+        $imageUrl = 'https://images.unsplash.com/photo-1627286381530-2234057885b5?w=600'; // Đà Lạt
+    } elseif (strpos($name, 'nẵng') !== false) {
+        $imageUrl = 'https://images.unsplash.com/photo-1555919636-f331627b031c?w=600'; // Đà Nẵng
+    } elseif (strpos($name, 'trang') !== false) {
+        $imageUrl = 'https://images.unsplash.com/photo-1571401888144-cb1d3101b44b?w=600'; // Nha Trang
+    } elseif (strpos($name, 'long') !== false) {
+        $imageUrl = 'https://images.unsplash.com/photo-1528127269322-539801943592?w=600'; // Hạ Long
+    } elseif (strpos($name, 'pa') !== false) {
+        $imageUrl = 'https://images.unsplash.com/photo-1508873696983-2df519f0397e?w=600'; // Sa Pa
+    }
+@endphp
+
+<img src="{{ $imageUrl }}" class="card-img-top" alt="{{ $combo->name }}" style="height: 200px; object-fit: cover;">
                     
                     <div class="card-body d-flex flex-column">
                         <h5 class="card-title fw-bold text-dark">{{ $combo->name }}</h5>

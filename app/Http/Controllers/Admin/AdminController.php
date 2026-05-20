@@ -4,91 +4,63 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
-
-// Đảm bảo các Model này đã tồn tại trong thư mục app/Models
 use App\Models\User;
 use App\Models\Combo;
 use App\Models\Booking;
+use Illuminate\Support\Facades\Schema;
 
 class AdminController extends Controller
 {
-    /**
-     * Trang Dashboard - Thống kê tổng quan cho Admin
-     */
     public function dashboard()
     {
-        // 1. Đếm tổng số combo du lịch
-        $totalCombos = Combo::count();
-
-        // 2. Đếm tổng số đơn đặt hàng
+        // 1. Thống kê cơ bản
+        $totalCombos   = Combo::count();
         $totalBookings = Booking::count();
 
-        // 3. Tính tổng doanh thu từ các đơn hàng đã xác nhận
-        // Tự động quét và thử nghiệm các tên cột phổ biến để phòng tránh lỗi Column not found
-        try {
-            $totalRevenue = Booking::where('status', 'confirmed')->sum('gia_tien');
-        } catch (\Exception $e) {
-            try {
-                $totalRevenue = Booking::where('status', 'confirmed')->sum('total_price');
-            } catch (\Exception $ex) {
-                try {
-                    $totalRevenue = Booking::where('status', 'confirmed')->sum('price');
-                } catch (\Exception $lastEx) {
-                    $totalRevenue = 0; // Trả về 0 nếu không tìm thấy bất kỳ cột tiền nào trùng khớp
+        // 2. Tính doanh thu an toàn (Tự động tìm tên cột tiền)
+        $totalRevenue = 0;
+        if (Schema::hasTable('bookings')) {
+            $priceColumn = '';
+            foreach (['gia_tien', 'total_price', 'price'] as $col) {
+                if (Schema::hasColumn('bookings', $col)) {
+                    $priceColumn = $col;
+                    break;
                 }
             }
-        }
-        $totalRevenue = $totalRevenue ?? 0;
-
-        // 4. Đếm số lượng khách hàng (Không tính admin)
-        try {
-            $totalUsers = User::where('role', 'user')->count();
-        } catch (\Exception $e) {
-            // Nếu lỡ bảng chưa có cột role thì tạm thời trả về tổng số user để không bị vỡ trang
-            $totalUsers = User::count(); 
+            if ($priceColumn) {
+                $totalRevenue = Booking::where('status', 'confirmed')->sum($priceColumn);
+            }
         }
 
-        // --- CẬP NHẬT MỚI: XỬ LÝ LOGIC THỐNG KÊ PHẦN TRĂM THEO TRẠNG THÁI ĐƠN HÀNG ---
-        if ($totalBookings > 0) {
-            // Đếm số lượng đơn hàng theo từng trạng thái trong MySQL
-            $confirmedCount = Booking::where('status', 'confirmed')->count();
-            $pendingCount = Booking::where('status', 'pending')->count();
-            $cancelledCount = Booking::where('status', 'cancelled')->count();
+        // 3. Đếm người dùng
+        $totalUsers = Schema::hasColumn('users', 'role') 
+                      ? User::where('role', 'user')->count() 
+                      : User::count();
 
-            // Tính toán tỷ lệ phần trăm (Làm tròn bằng hàm round)
-            $confirmedPercentage = round(($confirmedCount / $totalBookings) * 100);
-            $pendingPercentage = round(($pendingCount / $totalBookings) * 100);
-            $cancelledPercentage = round(($cancelledCount / $totalBookings) * 100);
-        } else {
-            // Thiết lập giá trị mặc định nếu hệ thống mới reset và chưa có đơn hàng nào
-            $confirmedPercentage = 0;
-            $pendingPercentage = 0;
-            $cancelledPercentage = 0;
-        }
+        // 4. Thống kê phần trăm trạng thái đơn hàng (Tối ưu hóa chỉ với 1 query)
+        $statusCounts = Booking::select('status', \DB::raw('count(*) as total'))
+            ->groupBy('status')
+            ->pluck('total', 'status');
 
-        // Trả về view admin/dashboard.blade.php kèm dữ liệu số liệu
+        $confirmedCount = $statusCounts['confirmed'] ?? 0;
+        $pendingCount   = $statusCounts['pending'] ?? 0;
+        $cancelledCount = $statusCounts['cancelled'] ?? 0;
+
+        $confirmedPercentage = $totalBookings > 0 ? round(($confirmedCount / $totalBookings) * 100) : 0;
+        $pendingPercentage   = $totalBookings > 0 ? round(($pendingCount / $totalBookings) * 100) : 0;
+        $cancelledPercentage = $totalBookings > 0 ? round(($cancelledCount / $totalBookings) * 100) : 0;
+
         return view('admin.dashboard', compact(
-            'totalCombos', 
-            'totalBookings', 
-            'totalRevenue', 
-            'totalUsers',
-            'confirmedPercentage', // Truyền biến dữ liệu thật sang view
-            'pendingPercentage',   // Truyền biến dữ liệu thật sang view
-            'cancelledPercentage'  // Truyền biến dữ liệu thật sang view
+            'totalCombos', 'totalBookings', 'totalRevenue', 'totalUsers',
+            'confirmedPercentage', 'pendingPercentage', 'cancelledPercentage'
         ));
     }
 
-    /**
-     * Danh sách khách hàng
-     */
     public function users()
     {
-        // Lấy danh sách user, xếp mới nhất lên đầu
-        try {
-            $users = User::where('role', 'user')->latest()->get();
-        } catch (\Exception $e) {
-            $users = User::latest()->get();
-        }
+        $users = Schema::hasColumn('users', 'role') 
+                 ? User::where('role', 'user')->latest()->get() 
+                 : User::latest()->get();
 
         return view('admin.users.index', compact('users'));
     }

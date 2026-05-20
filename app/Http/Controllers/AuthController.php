@@ -51,12 +51,12 @@ class AuthController extends Controller
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate(); // Bảo mật session
 
-            // Kiểm tra role để điều hướng vào Admin hoặc User
+            // Kiểm tra role để điều hướng trực tiếp vào Admin hoặc User
             if (Auth::user()->role === 'admin') {
-                return redirect()->intended(route('admin.dashboard')); 
+                return redirect()->route('admin.dashboard'); 
             }
             
-            return redirect()->intended(route('home'));
+            return redirect()->route('home');
         }
 
         return back()->withErrors([

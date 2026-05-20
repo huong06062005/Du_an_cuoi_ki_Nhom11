@@ -13,7 +13,7 @@
                 elseif (strpos($name, 'pa') !== false) $imageUrl = 'https://images.unsplash.com/photo-1508873696983-2df519f0397e?w=800';
             @endphp
             <img src="{{ $imageUrl }}" class="img-fluid rounded shadow-sm w-100" alt="{{ $combo->name }}" style="height: 400px; object-fit: cover;">
-        </div>
+                </div>
 
         <div class="col-md-6">
             <nav aria-label="breadcrumb">
@@ -31,8 +31,8 @@
                 <p class="card-text text-muted" style="font-size: 1.1rem; line-height: 1.8; white-space: pre-line;">
                     {{ $combo->description }}
                 </p>
-            </div>
-
+    </div>
+    
             <a href="{{ route('client.booking.create', $combo->id) }}" class="btn btn-success btn-lg w-100 p-3 fw-bold rounded-3 shadow">
                 <i class="bi bi-calendar-check"></i> TIẾN HÀNH ĐẶT COMBO
             </a>

@@ -1,4 +1,5 @@
 @extends('client.layouts.master')
+
 @section('content')
 <div class="max-w-5xl mx-auto py-16 px-4">
     <div class="flex items-center mb-10">
@@ -18,11 +19,19 @@
                 </tr>
             </thead>
             <tbody>
-                @foreach($bookings as $booking)
+                {{-- Dùng @forelse thay @foreach để phòng ngừa tài khoản chưa đặt đơn nào --}}
+                @forelse($bookings as $booking)
                 <tr class="border-b hover:bg-gray-50 transition">
                     <td class="p-5 font-mono text-blue-600">#{{ $booking->id }}</td>
-                    <td class="p-5 font-bold text-gray-800">{{ $booking->combo->name }}</td>
-                    <td class="p-5 text-gray-400 text-sm">{{ $booking->created_at->format('d/m/Y') }}</td>
+                    
+                    {{-- Thêm dấu ?? để phòng trường hợp Combo gốc trong DB bị xóa mất --}}
+                    <td class="p-5 font-bold text-gray-800">
+                        {{ $booking->combo->name ?? 'Combo không tồn tại hoặc đã bị xóa' }}
+                    </td>
+                    
+                    <td class="p-5 text-gray-400 text-sm">
+                        {{ $booking->created_at ? $booking->created_at->format('d/m/Y') : 'N/A' }}
+                    </td>
                     <td class="p-5 text-center">
                         @php
                             $statusMap = [
@@ -34,9 +43,19 @@
                         @endphp
                         <span class="{{ $st[0] }} px-3 py-1 rounded-full text-[10px] font-extrabold uppercase">{{ $st[1] }}</span>
                     </td>
-                    <td class="p-5 text-right font-bold text-lg">{{ number_format($booking->total_price) }}đ</td>
+                    <td class="p-5 text-right font-bold text-lg">
+                        {{ number_format($booking->total_price ?? 0) }}đ
+                    </td>
                 </tr>
-                @endforeach
+                @empty
+                {{-- Hiển thị cái này nếu danh sách lịch sử trống trơn --}}
+                <tr>
+                    <td colspan="5" class="p-10 text-center text-gray-400">
+                        Bạn chưa đặt gói combo nào cả. 
+                        <a href="/" class="text-blue-600 font-bold hover:underline ml-1">Đặt ngay?</a>
+                    </td>
+                </tr>
+                @endforelse
             </tbody>
         </table>
     </div>

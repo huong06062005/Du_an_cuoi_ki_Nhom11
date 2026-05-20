@@ -41,31 +41,37 @@ class ComboManageController extends Controller
             $hinh_anh_path = $request->hinh_anh_url;
         }
 
-        $priceColumn = 'price';
-        if (Schema::hasColumn('services', 'price')) $priceColumn = 'price';
-        elseif (Schema::hasColumn('services', 'gia_tien')) $priceColumn = 'gia_tien';
-        elseif (Schema::hasColumn('services', 'gia_nhap')) $priceColumn = 'gia_nhap';
-        elseif (Schema::hasColumn('services', 'gia_goc')) $priceColumn = 'gia_goc';
+        $totalPrice = 0;
+        if ($request->has('services')) {
+            foreach ($request->services as $serviceId) {
+                $service = Service::find($serviceId);
+                if ($service) {
+                    $totalPrice += $service->price ?? ($service->gia_tien ?? 0);
+                }
+            }
+        }
 
-        $totalPrice = Service::whereIn('id', $request->services)->sum($priceColumn);
-
-        // ĐÃ CẬP NHẬT: Nhận giá trị trạng thái từ checkbox "is_featured" gửi lên
-        $isFeaturedValue = $request->has('is_featured') ? 1 : 0;
+        // MẸO THÔNG MINH: Gài từ khóa ẩn vào mô tả nếu Admin tích chọn phổ biến
+        $moTaGoc = str_replace('[POPULAR]', '', $request->mo_ta);
+        if ($request->has('is_featured')) {
+            $moTaGoc = trim($moTaGoc) . ' [POPULAR]';
+        }
 
         $insertData = [
             'name'         => $request->ten_combo,
             'ten_combo'    => $request->ten_combo,
-            'description'  => $request->mo_ta,
-            'mo_ta'        => $request->mo_ta,
-            'image'        => $hinh_anh_path,
-            'hinh_anh'     => $hinh_anh_path,
+            'description'  => $moTaGoc,
+            'mo_ta'        => $moTaGoc,
             'price'        => $totalPrice,
             'gia_tien'     => $totalPrice,
             'status'       => 1,
             'trang_thai'   => 1,
-            'is_featured'  => $isFeaturedValue,
-            'noi_bat'      => $isFeaturedValue,
         ];
+
+        if ($hinh_anh_path) {
+            $insertData['image']    = $hinh_anh_path;
+            $insertData['hinh_anh'] = $hinh_anh_path;
+        }
 
         $safeInsertData = array_filter($insertData, function ($key) {
             return Schema::hasColumn('combos', $key);
@@ -102,26 +108,29 @@ class ComboManageController extends Controller
             'hinh_anh_url' => 'nullable|url'
         ]);
 
-        $priceColumn = 'price';
-        if (Schema::hasColumn('services', 'price')) $priceColumn = 'price';
-        elseif (Schema::hasColumn('services', 'gia_tien')) $priceColumn = 'gia_tien';
-        elseif (Schema::hasColumn('services', 'gia_nhap')) $priceColumn = 'gia_nhap';
-        elseif (Schema::hasColumn('services', 'gia_goc')) $priceColumn = 'gia_goc';
+        $totalPrice = 0;
+        if ($request->has('services')) {
+            foreach ($request->services as $serviceId) {
+                $service = Service::find($serviceId);
+                if ($service) {
+                    $totalPrice += $service->price ?? ($service->gia_tien ?? 0);
+                }
+            }
+        }
 
-        $totalPrice = Service::whereIn('id', $request->services)->sum($priceColumn);
-
-        // ĐÃ CẬP NHẬT: Cập nhật trạng thái phổ biến khi Admin chỉnh sửa tích/bỏ tích
-        $isFeaturedValue = $request->has('is_featured') ? 1 : 0;
+        // MẸO THÔNG MINH KHI UPDATE: Nếu tích chọn thì gài thêm chữ [POPULAR], nếu bỏ tích thì xóa sạch chữ đó đi
+        $moTaGoc = str_replace('[POPULAR]', '', $request->mo_ta);
+        if ($request->has('is_featured')) {
+            $moTaGoc = trim($moTaGoc) . ' [POPULAR]';
+        }
 
         $updateData = [
             'name'         => $request->ten_combo,
             'ten_combo'    => $request->ten_combo,
-            'description'  => $request->mo_ta,
-            'mo_ta'        => $request->mo_ta,
+            'description'  => $moTaGoc,
+            'mo_ta'        => $moTaGoc,
             'price'        => $totalPrice,
             'gia_tien'     => $totalPrice,
-            'is_featured'  => $isFeaturedValue,
-            'noi_bat'      => $isFeaturedValue,
         ];
 
         $newImagePath = null;

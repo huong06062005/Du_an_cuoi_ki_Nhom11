@@ -17,7 +17,7 @@ use App\Http\Controllers\ContactController;
 |--------------------------------------------------------------------------
 */
 Route::get('/', [HomeController::class, 'index'])->name('home');
-Route::get('/combos', [ComboController::class, 'index'])->name('combos.index'); 
+Route::get('/combos', [HomeController::class, 'allCombos'])->name('combos.index');
 Route::get('/combos/{id}', [ComboController::class, 'show'])->name('combos.show');
 
 // Route Liên hệ (Bổ sung thêm POST để xử lý form)

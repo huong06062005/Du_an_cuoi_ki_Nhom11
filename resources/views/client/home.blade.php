@@ -42,7 +42,8 @@
                     <h2 class="text-3xl font-black text-slate-900 uppercase">Danh sách Gói Combo</h2>
                     <div class="h-1.5 w-20 bg-blue-600 mt-2 rounded-full"></div>
                 </div>
-                <a href="#" class="text-blue-600 font-bold text-sm hover:underline">Xem tất cả combo →</a>
+                {{-- ĐÃ SỬA: Thêm route() để chuyển hướng sang trang tất cả gói combo sạch lỗi lặp --}}
+                <a href="{{ route('combos.index') }}" class="text-blue-600 font-bold text-sm hover:underline">Xem tất cả combo →</a>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
@@ -52,7 +53,7 @@
                         <div class="relative h-80 overflow-hidden">
                             <img src="{{ $combo->image_url }}" alt="{{ $combo->name }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700">
                             
-                            {{-- ĐÃ SỬA LỌC NHÃN: Chỉ hiển thị nhãn BÁN CHẠY khi combo đó được tích chọn là phổ biến trong Admin --}}
+                            {{-- Hiển thị nhãn nổi bật --}}
                             @if(($combo->is_featured ?? 0) == 1 || ($combo->noi_bat ?? 0) == 1)
                                 <div class="absolute top-6 left-6 bg-red-500 text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm">
                                     BÁN CHẠY 🔥
@@ -66,27 +67,21 @@
                                 {{ $combo->name ?? $combo->ten_combo }}
                             </h3>
                             
-                            {{-- Hiển thị mô tả ngắn gọn --}}
                             <p class="text-xs text-slate-400 mb-6 line-clamp-2 italic">
                                 {{ $combo->mo_ta_text }}
                             </p>
 
-                            {{-- Khối Hiển Thị Giá Tiền (ĐÃ SỬA TRIỆT ĐỂ LỖI 0 VNĐ) --}}
+                            {{-- Khối Hiển Thị Giá Tiền --}}
                             <div class="mb-8">
                                 @php
-                                    // ĐÃ SỬA: Ưu tiên gọi real_price từ Model Combo để lấy giá từ bảng liên kết, phòng hờ thêm price và gia_tien
                                     $currentPrice = $combo->real_price ?? ($combo->price ?? ($combo->gia_tien ?? 0));
-                                    
-                                    // Tự động tính giá cũ (gạch ngang) cao hơn giá gốc 25% làm hiệu ứng marketing giảm giá
                                     $oldPrice = $combo->old_price ?? ($combo->gia_cu ?? ($currentPrice * 1.25));
                                 @endphp
                                 
-                                {{-- Giá cũ gạch ngang --}}
                                 <div class="text-slate-400 text-sm line-through font-medium mb-1">
                                     {{ number_format($oldPrice, 0, ',', '.') }} VNĐ
                                 </div>
                                 
-                                {{-- Giá bán chính thức màu đỏ --}}
                                 <div class="flex items-baseline gap-1">
                                     <span class="text-3xl font-black text-red-500">{{ number_format($currentPrice, 0, ',', '.') }}</span>
                                     <span class="text-sm font-bold text-red-400">VNĐ</span>

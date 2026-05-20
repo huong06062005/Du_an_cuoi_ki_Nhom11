@@ -44,7 +44,7 @@
                         
                         <div class="mt-auto d-flex justify-content-between align-items-center">
                             <span class="text-danger fw-bold fs-5">{{ number_format($combo->price, 0, ',', '.') }} đ</span>
-                            <a href="#" class="btn btn-primary btn-sm px-3 fw-bold">Xem chi tiết</a>
+                            <a href="{{ route('client.combos.show', $combo->id) }}" class="btn btn-primary btn-sm px-3 fw-bold">Xem chi tiết</a>
                         </div>
                     </div>
                 </div>

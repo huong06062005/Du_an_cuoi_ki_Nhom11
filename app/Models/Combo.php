@@ -9,6 +9,24 @@ class Combo extends Model
 {
     use HasFactory;
 
-    // Thêm dòng này để cho phép nạp dữ liệu nhanh vào các cột
-    protected $fillable = ['name', 'description', 'price', 'image'];
+    protected $table = 'combos';
+
+    protected $fillable = [
+        'name',
+        'description',
+        'image',
+        'total_price'
+    ];
+
+    // Quan hệ nhiều - nhiều với dịch vụ thành phần
+    public function services()
+    {
+        return $this->belongsToMany(Service::class, 'combo_service', 'combo_id', 'service_id')->withTimestamps();
+    }
+
+    // Quan hệ một - nhiều với bảng bookings (đơn đặt)
+    public function bookings()
+    {
+        return $this->hasMany(Booking::class, 'combo_id');
+    }
 }

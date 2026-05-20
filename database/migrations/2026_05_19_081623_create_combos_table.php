@@ -6,18 +6,24 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    public function up(): void
-    {
-        Schema::create('combos', function (Blueprint $table) {
-            $table->id();
-            $table->string('name');         // Tên combo
-            $table->text('description')->nullable(); // Mô tả
-            $table->decimal('price', 15, 2); // Giá tiền
-            $table->string('image')->nullable(); // Đường dẫn ảnh
-            $table->timestamps();
-        });
-    }
+    /**
+     * Run the migrations.
+     */
+    public function up()
+{
+    Schema::create('combos', function (Blueprint $table) {
+        $table->id();
+        $table->string('name');
+        $table->text('description')->nullable();
+        $table->string('image')->nullable();
+        $table->decimal('total_price', 15, 2)->default(0); 
+        $table->timestamps();
+    });
+}
 
+    /**
+     * Reverse the migrations.
+     */
     public function down(): void
     {
         Schema::dropIfExists('combos');

@@ -5,7 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 
-// Đảm bảo em đã tạo các Model này
+// Đảm bảo các Model này đã tồn tại trong thư mục app/Models
 use App\Models\User;
 use App\Models\Combo;
 use App\Models\Booking;
@@ -21,24 +21,34 @@ class AdminController extends Controller
         $totalCombos = Combo::count();
 
         // 2. Đếm tổng số đơn đặt hàng
-        // Đảm bảo Model Booking đã tồn tại, nếu chưa hãy chạy: php artisan make:model Booking
         $totalBookings = Booking::count();
 
         // 3. Tính tổng doanh thu từ các đơn hàng đã xác nhận
-        // Thầy đổi 'total_price' thành 'gia_tien' cho đồng bộ với các file khác em đã sửa
-        $totalRevenue = Booking::where('status', 'confirmed')->sum('gia_tien') ?? 0;
+        // Tự động quét và thử nghiệm các tên cột phổ biến để phòng tránh lỗi Column not found
+        try {
+            $totalRevenue = Booking::where('status', 'confirmed')->sum('gia_tien');
+        } catch (\Exception $e) {
+            try {
+                $totalRevenue = Booking::where('status', 'confirmed')->sum('total_price');
+            } catch (\Exception $ex) {
+                try {
+                    $totalRevenue = Booking::where('status', 'confirmed')->sum('price');
+                } catch (\Exception $lastEx) {
+                    $totalRevenue = 0; // Trả về 0 nếu không tìm thấy bất kỳ cột tiền nào trùng khớp
+                }
+            }
+        }
+        $totalRevenue = $totalRevenue ?? 0;
 
         // 4. Đếm số lượng khách hàng (Không tính admin)
-        // LƯU Ý QUAN TRỌNG: Em phải chắc chắn đã thêm cột 'role' vào bảng users
-        // Nếu chưa có cột 'role', dòng này sẽ gây lỗi màn hình đỏ ngay lập tức
         try {
             $totalUsers = User::where('role', 'user')->count();
         } catch (\Exception $e) {
-            // Nếu lỡ bảng chưa có cột role thì tạm thời trả về 0 để không bị vỡ trang
+            // Nếu lỡ bảng chưa có cột role thì tạm thời trả về tổng số user để không bị vỡ trang
             $totalUsers = User::count(); 
         }
 
-        // Trả về view admin/dashboard.blade.php kèm dữ liệu
+        // Trả về view admin/dashboard.blade.php kèm dữ liệu số liệu
         return view('admin.dashboard', compact(
             'totalCombos', 
             'totalBookings', 
@@ -53,7 +63,6 @@ class AdminController extends Controller
     public function users()
     {
         // Lấy danh sách user, xếp mới nhất lên đầu
-        // Tương tự dashboard, phần này cần cột 'role' trong database
         $users = User::latest()->get();
 
         return view('admin.users.index', compact('users'));

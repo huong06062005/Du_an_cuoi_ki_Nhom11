@@ -34,7 +34,7 @@ class AuthController extends Controller
             'name' => $request->name,
             'email' => $request->email,
             'password' => Hash::make($request->password),
-            'role' => 'user' // Mặc định là khách hàng
+            'role' => 'user' // Mặc định đăng ký trên web là tài khoản thường
         ]);
 
         return redirect()->route('login')->with('success', 'Đăng ký thành công! Mời bạn đăng nhập.');
@@ -51,8 +51,17 @@ class AuthController extends Controller
         if (Auth::attempt($credentials)) {
             $request->session()->regenerate(); // Bảo mật session
 
-            // Kiểm tra role để điều hướng trực tiếp vào Admin hoặc User
-            if (Auth::user()->role === 'admin') {
+            $user = Auth::user();
+
+            // ĐOẠN CỨU HỘ: Tự động nhận diện và kích hoạt quyền Admin tối cao cho Hương
+            // Từ giờ dù em có reset database, chỉ cần đăng nhập bằng email này là hệ thống tự thăng chức Admin luôn, không cần gõ lệnh Tinker nữa.
+            if ($user->email === 'huong@gmail.com' && $user->role !== 'admin') {
+                $user->role = 'admin';
+                $user->save();
+            }
+
+            // Kiểm tra cột role để điều hướng đi đúng trang công việc
+            if ($user->role === 'admin') {
                 return redirect()->route('admin.dashboard'); 
             }
             

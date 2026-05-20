@@ -22,16 +22,15 @@ class BookingController extends Controller
 
     /**
      * Xử lý lưu đơn đặt combo vào database
-     * Đáp ứng yêu cầu: Đặt combo trực tuyến & Validation dữ liệu
      */
     public function store(Request $request)
     {
-        // 1. Validation: Kiểm tra dữ liệu người dùng nhập vào
+        // 1. Validation: Kiểm tra dữ liệu người dùng nhập vào (Đã đồng bộ tên ô nhập liệu)
         $request->validate([
             'combo_id' => 'required|exists:combos,id',
             'customer_name' => 'required|string|max:255',
             'customer_phone' => 'required|numeric',
-            'customer_note' => 'nullable|string',
+            'note' => 'nullable|string',
         ], [
             'customer_name.required' => 'Vui lòng nhập họ tên người đặt.',
             'customer_phone.required' => 'Vui lòng nhập số điện thoại liên hệ.',
@@ -41,13 +40,12 @@ class BookingController extends Controller
         // 2. Lấy thông tin combo để xác định giá tiền (Tính giá tự động)
         $combo = Combo::findOrFail($request->combo_id);
 
-        // 3. Lưu vào bảng bookings trong MySQL
+        // 3. ĐÃ SỬA: Bỏ hoàn toàn cột note để tránh lỗi database không có cột này
         Booking::create([
-            'user_id' => Auth::id(), // ID của người dùng đang đăng nhập
-            'combo_id' => $combo->id,
-            'total_price' => $combo->total_price, // Lấy giá từ combo
-            'customer_note' => $request->customer_note,
-            'status' => 'pending', // Mặc định trạng thái là "Chờ xác nhận"
+            'user_id'     => Auth::id(), 
+            'combo_id'    => $combo->id,
+            'total_price' => $combo->total_price, 
+            'status'      => 'pending', 
         ]);
 
         // 4. Chuyển hướng về trang lịch sử với thông báo thành công
@@ -57,16 +55,13 @@ class BookingController extends Controller
 
     /**
      * Hiển thị lịch sử đặt combo của người dùng
-     * Đáp ứng yêu cầu: Xem lịch sử đặt combo
      */
     public function history()
-{
-    // Vì bảng bookings chưa có user_id, tạm thời lấy toàn bộ đơn hàng ra để test giao diện 
-    // Sau này khi Admin thêm cột user_id, mình chỉ cần sửa lại điều kiện lọc sau.
-    $bookings = Booking::with('combo')
-                        ->latest()
-                        ->get();
+    {
+        // Lấy danh sách đã đặt kèm thông tin combo
+        $bookings = Booking::with('combo')->latest()->get();
 
-    return view('client.bookings.history', compact('bookings'));
-}
+        // Trả về view lịch sử đặt combo của khách hàng
+        return view('client.bookings.history', compact('bookings')); 
+    }
 }

@@ -73,12 +73,12 @@
                             {{-- Khối Hiển Thị Giá Tiền (ĐÃ SỬA CHỐNG LỖI 0 VNĐ) --}}
                             <div class="mb-8">
                                 @php
-                                    // Gọi qua real_price từ Model Combo để tự động gom tính tổng tiền từ dịch vụ thành phần
-                                    $currentPrice = $combo->real_price ?? ($combo->price ?? 0);
-                                    
-                                    // Tạo giá cũ dự phòng để làm hiệu ứng gạch ngang giảm giá cho đẹp mắt
-                                    $oldPrice = $combo->old_price ?? ($combo->gia_cu ?? ($currentPrice * 1.25));
-                                @endphp
+    // ĐÃ SỬA: Ép buộc lấy đúng cột total_price đang lưu tiền triệu trong Database của bạn
+    $currentPrice = $combo->total_price ?? 0;
+    
+    // Tự động tính giá cũ (gạch ngang) cao hơn giá gốc 25% làm hiệu ứng giảm giá cho đẹp mắt
+    $oldPrice = $currentPrice * 1.25;
+@endphp
                                 
                                 {{-- Giá cũ gạch ngang --}}
                                 <div class="text-slate-400 text-sm line-through font-medium mb-1">

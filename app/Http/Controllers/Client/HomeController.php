@@ -3,37 +3,42 @@
 namespace App\Http\Controllers\Client;
 
 use App\Http\Controllers\Controller;
-use App\Models\Combo; // Đảm bảo em đã chạy lệnh: php artisan make:model Combo
 use Illuminate\Http\Request;
+use App\Models\Combo;
 
-class HomeController extends Controller 
+class HomeController extends Controller
 {
-    public function index(Request $request) 
-    {
-        $query = Combo::query();
+    public function index(Request $request)
+{
+    $query = Combo::query();
 
-        // 1. Lọc theo địa điểm (Phần "Địa điểm" trên giao diện)
-        if ($request->filled('location')) {
-            $query->where('location', 'like', '%' . $request->location . '%');
-        }
-
-        // 2. Lọc theo giá từ (Giá từ)
-        if ($request->filled('price_from')) {
-            $query->where('price', '>=', $request->price_from);
-        }
-
-        // 3. Lọc theo giá đến (Giá đến)
-        if ($request->filled('price_to')) {
-            $query->where('price', '<=', $request->price_to);
-        }
-
-        // 4. Tìm kiếm chung (Nếu có ô search tên)
-        if ($request->filled('search')) {
-            $query->where('name', 'like', '%' . $request->search . '%');
-        }
-
-        $combos = $query->latest()->get(); // Lấy các combo mới nhất trước
-
-        return view('client.home', compact('combos'));
+    // Tìm kiếm theo tên hoặc mô tả
+    if ($request->has('search') && $request->search != '') {
+        $search = $request->search;
+        $query->where(function($q) use ($search) {
+            $q->where('name', 'LIKE', '%' . $search . '%')
+              ->orWhere('description', 'LIKE', '%' . $search . '%');
+        });
     }
+
+    // Lọc theo loại hình trải nghiệm
+    if ($request->has('category') && $request->category != '') {
+        $query->where('description', 'LIKE', '%' . $request->category . '%');
+    }
+
+    // ĐÃ SỬA: Lọc mức giá theo đúng cột `total_price` trong Database của bạn
+    if ($request->has('price_range') && $request->price_range != '') {
+        if ($request->price_range == 'under_2m') {
+            $query->where('total_price', '<', 2000000);
+        } elseif ($request->price_range == '2m_5m') {
+            $query->whereBetween('total_price', [2000000, 5000000]);
+        } elseif ($request->price_range == 'over_5m') {
+            $query->where('total_price', '>', 5000000);
+        }
+    }
+
+   $combos = $query->latest()->get();
+
+    return view('client.home', compact('combos'));
+}
 }

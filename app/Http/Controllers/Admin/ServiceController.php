@@ -6,12 +6,12 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use App\Models\Service; // Model quản lý dịch vụ thành phần
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Facades\Schema; // Khai báo thư viện để tự động kiểm tra cột database
 
 class ServiceController extends Controller
 {
     /**
      * Danh sách dịch vụ
-     * Phân loại trực quan: Vé máy bay, Khách sạn, Vé tham quan, Xe đưa đón...
      */
     public function index()
     {
@@ -29,7 +29,7 @@ class ServiceController extends Controller
     }
 
     /**
-     * Lưu dịch vụ mới vào Database (Vé máy bay, Khách sạn, Vé vui chơi...)
+     * Lưu dịch vụ mới vào Database (Tự động lọc tên cột tránh lỗi MySQL)
      */
     public function store(Request $request)
     {
@@ -38,34 +38,41 @@ class ServiceController extends Controller
             'name' => 'required|string|max:255',
             'type' => 'required|in:flight,hotel,attraction,transport', // Bắt buộc chọn đúng phân loại
             'price' => 'required|numeric|min:0',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048', // Tối đa 2MB
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048', // Bổ sung thêm đuôi webp phổ biến
             'mo_ta_chi_tiet' => 'nullable|string'
         ]);
 
-        // 2. Gom dữ liệu cơ bản (Tự động bọc lót cả 2 phương án tiếng Anh và tiếng Việt cho an toàn database)
-        $data = [
-            'name' => $request->name,
-            'ten_dich_vu' => $request->name,
+        // 2. Gom dữ liệu cơ bản (Gồm cả phương án tiếng Anh và tiếng Việt dự phòng)
+        $rawFormInputs = [
+            'name'           => $request->name,
+            'ten_dich_vu'    => $request->name,
             
-            'type' => $request->type,
-            'loai_dich_vu' => $request->type,
+            'type'           => $request->type,
+            'loai_dich_vu'   => $request->type,
             
-            'price' => $request->price,
-            'gia_tien' => $request->price,
+            'price'          => $request->price,
+            'gia_tien'       => $request->price,
             
-            'mo_ta' => $request->mo_ta_chi_tiet, 
+            'mo_ta'          => $request->mo_ta_chi_tiet, 
             'mo_ta_chi_tiet' => $request->mo_ta_chi_tiet, 
         ];
 
         // 3. Xử lý upload hình ảnh dịch vụ nếu có
         if ($request->hasFile('image')) {
             $imagePath = $request->file('image')->store('services', 'public');
-            $data['image'] = $imagePath;
-            $data['hinnh_anh'] = $imagePath; // Dự phòng trường tên cột tiếng Việt
+            $rawFormInputs['image']     = $imagePath;
+            $rawFormInputs['image_path']= $imagePath;
+            $rawFormInputs['hinh_anh']  = $imagePath;
+            $rawFormInputs['hinnh_anh'] = $imagePath; // Sửa lỗi viết sai chính tả tiêu đề phòng hờ
         }
 
-        // 4. Lưu dữ liệu vào bảng MySQL
-        Service::create($data);
+        // 4. BỘ LỌC THÔNG MINH: Tự động giữ lại các trường có thật trong MySQL của em, loại bỏ trường thừa gây crash lỗi
+        $safeData = array_filter($rawFormInputs, function ($key) {
+            return Schema::hasColumn('services', $key);
+        }, ARRAY_FILTER_USE_KEY);
+
+        // 5. Tiến hành lưu vào bảng MySQL
+        Service::create($safeData);
 
         return redirect()->route('admin.services.index')->with('success', 'Thêm dịch vụ thành công!');
     }
@@ -90,40 +97,48 @@ class ServiceController extends Controller
             'name' => 'required|string|max:255',
             'type' => 'required|in:flight,hotel,attraction,transport',
             'price' => 'required|numeric|min:0',
-            'image' => 'nullable|image|mimes:jpeg,png,jpg|max:2048',
+            'image' => 'nullable|image|mimes:jpeg,png,jpg,webp|max:2048',
             'mo_ta_chi_tiet' => 'nullable|string'
         ]);
 
-        $data = [
-            'name' => $request->name,
-            'ten_dich_vu' => $request->name,
+        $rawFormInputs = [
+            'name'           => $request->name,
+            'ten_dich_vu'    => $request->name,
             
-            'type' => $request->type,
-            'loai_dich_vu' => $request->type,
+            'type'           => $request->type,
+            'loai_dich_vu'   => $request->type,
             
-            'price' => $request->price,
-            'gia_tien' => $request->price,
+            'price'          => $request->price,
+            'gia_tien'       => $request->price,
             
-            'mo_ta' => $request->mo_ta_chi_tiet,
+            'mo_ta'          => $request->mo_ta_chi_tiet,
             'mo_ta_chi_tiet' => $request->mo_ta_chi_tiet,
         ];
 
         // Xử lý thay thế ảnh cũ nếu có upload ảnh mới
         if ($request->hasFile('image')) {
-            // Xóa file ảnh vật lý cũ trong thư mục Storage để tránh nặng bộ nhớ máy
-            if (!empty($service->image) && Storage::disk('public')->exists($service->image)) {
-                Storage::disk('public')->delete($service->image);
-            }
-            if (!empty($service->hinh_anh) && Storage::disk('public')->exists($service->hinh_anh)) {
-                Storage::disk('public')->delete($service->hinh_anh);
+            // Danh sách các cột chứa ảnh có thể có trong model của em
+            $imageFields = ['image', 'image_path', 'hinh_anh', 'hinnh_anh'];
+            
+            foreach ($imageFields as $field) {
+                if (!empty($service->$field) && Storage::disk('public')->exists($service->$field)) {
+                    Storage::disk('public')->delete($service->$field);
+                }
             }
 
             $imagePath = $request->file('image')->store('services', 'public');
-            $data['image'] = $imagePath;
-            $data['hinh_anh'] = $imagePath;
+            $rawFormInputs['image']     = $imagePath;
+            $rawFormInputs['image_path']= $imagePath;
+            $rawFormInputs['hinh_anh']  = $imagePath;
+            $rawFormInputs['hinnh_anh'] = $imagePath;
         }
 
-        $service->update($data);
+        // Tự động lọc thông minh cho hành động Update
+        $safeData = array_filter($rawFormInputs, function ($key) {
+            return Schema::hasColumn('services', $key);
+        }, ARRAY_FILTER_USE_KEY);
+
+        $service->update($safeData);
 
         return redirect()->route('admin.services.index')->with('success', 'Cập nhật dịch vụ thành công!');
     }
@@ -135,12 +150,12 @@ class ServiceController extends Controller
     {
         $service = Service::findOrFail($id);
         
-        // Xóa ảnh cũ trước khi xóa hàng trong database
-        if (!empty($service->image) && Storage::disk('public')->exists($service->image)) {
-            Storage::disk('public')->delete($service->image);
-        }
-        if (!empty($service->hinh_anh) && Storage::disk('public')->exists($service->hinh_anh)) {
-            Storage::disk('public')->delete($service->hinh_anh);
+        // Liệt kê xóa toàn bộ ảnh vật lý để sạch dung lượng disk máy
+        $imageFields = ['image', 'image_path', 'hinh_anh', 'hinnh_anh'];
+        foreach ($imageFields as $field) {
+            if (!empty($service->$field) && Storage::disk('public')->exists($service->$field)) {
+                Storage::disk('public')->delete($service->$field);
+            }
         }
         
         $service->delete();

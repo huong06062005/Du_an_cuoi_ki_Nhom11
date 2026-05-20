@@ -1,22 +1,9 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\AuthController;
-use App\Http\Controllers\Client\HomeController;
-use App\Http\Controllers\Client\ComboController;
-use App\Http\Controllers\Client\BookingController;
-use App\Http\Controllers\Admin\AdminController;
-use App\Http\Controllers\Admin\ServiceController;
-use App\Http\Controllers\Admin\ComboManageController;
-use App\Http\Controllers\Admin\BookingManageController;
+use App\Http\Controllers\Client\HomeController; // <--- ĐẢM BẢO PHẢI CÓ DÒNG NÀY
 
-/*
-|--------------------------------------------------------------------------
-| 1. NHÓM PUBLIC (Ai cũng truy cập được)
-|--------------------------------------------------------------------------
-*/
-
-// Trang chủ và xem danh sách, chi tiết Combo
+// Tuyến đường trang chủ của bạn
 Route::get('/', [HomeController::class, 'index'])->name('home');
 Route::get('/combos', [ComboController::class, 'index'])->name('combos.index'); 
 Route::get('/combos/{id}', [ComboController::class, 'show'])->name('combos.show');

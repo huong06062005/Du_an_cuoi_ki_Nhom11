@@ -26,15 +26,6 @@
                 </div>
 
                 <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-2">Loại hình trải nghiệm</label>
-                    <select name="category" class="w-full px-4 py-3 rounded-xl border focus:outline-none focus:border-blue-500 text-sm font-bold text-slate-700 cursor-pointer">
-                        <option value="">Tất cả dịch vụ</option>
-                        <option value="cáp treo" {{ request('category') == 'cáp treo' ? 'selected' : '' }}>Cáp treo / Vui chơi</option>
-                        <option value="nghỉ dưỡng" {{ request('category') == 'nghỉ dưỡng' ? 'selected' : '' }}>Nghỉ dưỡng / Khách sạn</option>
-                    </select>
-                </div>
-
-                <div>
                     <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black text-sm uppercase tracking-wider py-3.5 rounded-xl transition cursor-pointer">
                         TÌM KIẾM NGAY
                     </button>
@@ -54,9 +45,9 @@
 
 
                         {{-- ĐỔI THÀNH IMAGE_URL ĐỂ LẤY ĐÚNG ẢNH KHÔNG TRÙNG TRONG DATABASE --}}
-                        <img src="{{ $combo->image_url }}" 
+                        <img src="{{ $combo->image }}" 
                              class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500 rounded-lg" 
-                             alt="{{ $combo->name ?? $combo->ten_combo }}">
+                             alt="{{ $combo->name }}">
 
 
                         @if(($combo->is_featured ?? 0) == 1 || ($combo->noi_bat ?? 0) == 1)

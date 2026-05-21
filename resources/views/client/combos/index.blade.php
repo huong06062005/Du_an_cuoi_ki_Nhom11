@@ -52,10 +52,12 @@
                 <div>
                     <div class="overflow-hidden rounded-lg mb-3 h-40 w-full relative">
 
+
                         {{-- ĐỔI THÀNH IMAGE_URL ĐỂ LẤY ĐÚNG ẢNH KHÔNG TRÙNG TRONG DATABASE --}}
                         <img src="{{ $combo->image_url }}" 
                              class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500 rounded-lg" 
                              alt="{{ $combo->name ?? $combo->ten_combo }}">
+
 
                         @if(($combo->is_featured ?? 0) == 1 || ($combo->noi_bat ?? 0) == 1)
                             <div class="absolute top-2 left-2 bg-red-500 text-white px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider shadow-sm">

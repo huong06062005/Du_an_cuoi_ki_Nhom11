@@ -31,7 +31,6 @@
             <div>
                 <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Thông tin khách hàng</h3>
                 <div class="space-y-3">
-                    {{-- Đã sửa an toàn: Gọi thông qua quan hệ $order->user đã kết nối --}}
                     <p class="text-slate-800 font-bold text-lg">{{ $order->user->name ?? ($order->customer_name ?? 'Khách hàng ẩn danh') }}</p>
                     <p class="text-slate-600"><i class="fas fa-envelope w-6 text-blue-500"></i> {{ $order->user->email ?? ($order->email ?? 'Chưa cập nhật email') }}</p>
                     <p class="text-slate-600"><i class="fas fa-phone w-6 text-blue-500"></i> {{ $order->user->phone ?? ($order->phone ?? 'Chưa có số điện thoại') }}</p>
@@ -42,7 +41,6 @@
             <div class="bg-slate-50 p-6 rounded-xl border border-slate-100">
                 <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Dịch vụ đã đặt</h3>
                 <div class="flex items-center mb-4">
-                    {{-- Kiểm tra an toàn nguồn ảnh để tránh vỡ giao diện --}}
                     @php
                         $comboImage = $order->combo->image ?? ($order->combo->hinh_anh ?? '');
                         $displayComboImage = filter_var($comboImage, FILTER_VALIDATE_URL) ? $comboImage : (empty($comboImage) ? 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80' : asset('storage/' . $comboImage));
@@ -56,7 +54,17 @@
                 </div>
                 <div class="border-t border-slate-200 pt-4 flex justify-between items-end">
                     <span class="text-sm font-bold text-slate-500 uppercase">Tổng thanh toán</span>
-                    <span class="text-2xl font-black text-blue-600">{{ number_format($order->total_price ?? ($order->price ?? 0)) }}đ</span>
+                    
+                    {{-- 🔥 ĐÃ TỐI ƯU LOGIC BẪY GIÁ: Tự lấy giá từ Combo nếu giá trị đơn đặt chỗ bị trống (0đ) --}}
+                    @php
+                        $finalPrice = $order->total_price ?? ($order->price ?? 0);
+                        
+                        // Nếu giá trị đơn hàng bằng 0, chủ động lôi giá gốc từ bảng combos ra đắp vào
+                        if ($finalPrice == 0 && isset($order->combo)) {
+                            $finalPrice = $order->combo->real_price ?? ($order->combo->price ?? ($order->combo->gia_tien ?? 0));
+                        }
+                    @endphp
+                    <span class="text-2xl font-black text-blue-600">{{ number_format($finalPrice, 0, ',', '.') }}đ</span>
                 </div>
             </div>
         </div>

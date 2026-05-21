@@ -17,9 +17,10 @@ class AdminController extends Controller
         $totalCombos   = Combo::count();
         $totalBookings = Booking::count();
 
-        // 2. Tính doanh thu an toàn (Tự động tìm tên cột tiền)
+        // 2. 🔥 ĐÃ TỐI ƯU: Tính doanh thu thông minh, bẫy lỗi cột tiền bằng 0 và tự động lấy giá gốc của Combo
         $totalRevenue = 0;
         if (Schema::hasTable('bookings')) {
+            // Xác định tên cột tiền hiện tại của bảng bookings
             $priceColumn = '';
             foreach (['gia_tien', 'total_price', 'price'] as $col) {
                 if (Schema::hasColumn('bookings', $col)) {
@@ -27,8 +28,24 @@ class AdminController extends Controller
                     break;
                 }
             }
-            if ($priceColumn) {
-                $totalRevenue = Booking::where('status', 'confirmed')->sum($priceColumn);
+
+            // Lấy tất cả đơn hàng (Tính cho cả trạng thái confirmed và pending để hiển thị chính xác)
+            // Đồng thời eager load quan hệ 'combo' để lôi giá gốc nếu cần
+            $bookings = Booking::with('combo')
+                ->whereIn('status', ['confirmed', 'pending']) 
+                ->get();
+
+            foreach ($bookings as $booking) {
+                // Thử lấy giá lưu ở bảng booking trước
+                $currentPrice = $priceColumn ? ($booking->$priceColumn ?? 0) : 0;
+
+                // 💡 BẪY LỖI THẦN THÁNH: Nếu giá trị bằng 0, chủ động lôi giá từ bảng combo đắp vào tính toán
+                if ($currentPrice == 0 && isset($booking->combo)) {
+                    $currentPrice = $booking->combo->real_price ?? ($booking->combo->price ?? ($booking->combo->gia_tien ?? 0));
+                }
+
+                // Cộng dồn vào tổng doanh thu
+                $totalRevenue += $currentPrice;
             }
         }
 

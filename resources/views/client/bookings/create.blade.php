@@ -26,10 +26,11 @@
                 <textarea name="customer_note" rows="3" class="w-full bg-gray-50 border-b-2 border-gray-200 p-3 outline-none focus:border-blue-600 transition">{{ old('customer_note') }}</textarea>
             </div>
 
+        
             <div class="mb-8 p-4 bg-zinc-50 rounded-2xl border border-dashed flex justify-between items-center text-sm">
                 <span class="text-gray-600 font-bold uppercase tracking-wide">Tổng tiền thanh toán:</span>
                 <span class="text-red-600 font-extrabold text-xl">
-                    {{ number_format($combo->total_price ?? 0) }}đ
+                    {{ number_format($combo->total_price ?? 0, 0, ',', '.') }}đ
                 </span>
             </div>
 

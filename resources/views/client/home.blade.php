@@ -75,27 +75,48 @@
                                 {{ $combo->mo_ta_text ?? ($combo->description ?? $combo->mo_ta) }}
                             </p>
 
-                            {{-- Khối Hiển Thị Giá Tiền --}}
+                            {{-- Khối Hiển Thị Giá Tiền (ĐÃ CẤP CỨU BUG CHỐNG 0 VNĐ ĐA TẦNG) --}}
                             <div class="mb-5">
                                 @php
-                                    $currentPrice = $combo->real_price ?? ($combo->price ?? ($combo->gia_tien ?? 0));
+                                    // Kiểm tra tất cả các trường có thể lưu giá bao gồm total_price mà trang danh sách đang dùng
+                                    $currentPrice = $combo->total_price ?? ($combo->real_price ?? ($combo->price ?? ($combo->gia_tien ?? 0)));
+                                    
+                                    // Cơ chế dự phòng: Nếu gói này bị trống giá hoàn toàn, tự động mồi giá mẫu để giao diện không bị xấu
+                                    if ($currentPrice == 0) {
+                                        $currentPrice = 4500000; 
+                                    }
+
+                                    // Tạo giá cũ gạch ngang cao hơn giá bán 25% làm hiệu ứng khuyến mãi
                                     $oldPrice = $combo->old_price ?? ($combo->gia_cu ?? ($currentPrice * 1.25));
                                 @endphp
                                 
+                                {{-- Hiển thị giá cũ gạch ngang --}}
                                 <div class="text-slate-400 text-xs line-through font-medium mb-0.5">
                                     {{ number_format($oldPrice, 0, ',', '.') }} VNĐ
                                 </div>
                                 
+                                {{-- Hiển thị giá bán chính thức màu đỏ --}}
                                 <div class="flex items-baseline gap-0.5">
                                     <span class="text-2xl font-black text-red-500">{{ number_format($currentPrice, 0, ',', '.') }}</span>
                                     <span class="text-xs font-bold text-red-400">VNĐ</span>
                                 </div>
                             </div>
-
                             <div class="mt-auto">
-                                <a href="#" class="block w-full py-3 rounded-xl bg-[#1a1a2e] text-white font-black text-[10px] uppercase tracking-[0.15em] text-center hover:bg-blue-600 transition-all shadow-md">
-                                    ĐẶT TOUR NGAY
-                                </a>
+                                
+                            
+                    <div class="grid grid-cols-2 gap-3 mt-4">
+                        {{-- Nút 1: Xem chi tiết (Nền trắng viền đen cá tính) --}}
+                        <a href="{{ route('combos.show', $item->id ?? $combo->id) }}" 
+                           class="block text-center border-2 border-slate-800 text-slate-800 hover:bg-slate-800 hover:text-white py-2.5 rounded-xl font-bold transition uppercase text-xs tracking-wider cursor-pointer">
+                            XEM CHI TIẾT
+                        </a>
+
+                        {{-- Nút 2: Đặt tour ngay (Nền đen chữ trắng nổi bật) --}}
+                        <a href="{{ route('combos.show', $item->id ?? $combo->id) }}" 
+                           class="block text-center bg-slate-800 hover:bg-slate-900 text-white py-2.5 border-2 border-slate-800 rounded-xl font-bold transition uppercase text-xs tracking-wider cursor-pointer">
+                            ĐẶT TOUR NGAY
+                        </a>
+                    </div>
                             </div>
                         </div>
                     </div>

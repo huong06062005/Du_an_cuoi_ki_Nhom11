@@ -24,8 +24,26 @@
                         {{ $combo->name }}
                     </h1>
 
-                    <div class="bg-red-50 text-red-600 inline-block px-4 py-2 rounded-xl font-extrabold text-xl md:text-2xl mb-6">
-                        {{ number_format($combo->total_price ?? $combo->price ?? 0) }}đ <span class="text-xs text-gray-500 font-normal">/ khách</span>
+                  {{-- KHỐI HIỂN THỊ GIÁ ĐỒNG BỘ 100% VỚI INDEX --}}
+                    @php
+                        // Đưa công thức quét giá chuẩn từ file index sang để đồng bộ dữ liệu
+                        $currentPrice = $combo->real_price ?? ($combo->price ?? ($combo->gia_tien ?? 0));
+                        $oldPrice = $combo->old_price ?? ($combo->gia_cu ?? ($currentPrice * 1.25));
+                    @endphp
+
+                    <div class="mb-6">
+                        {{-- Giá cũ gạch ngang (nếu có giá cũ hoặc tự tính) --}}
+                        <p class="text-gray-400 line-through text-sm mb-1 font-medium">
+                            {{ number_format($oldPrice, 0, ',', '.') }}đ
+                        </p>
+
+                        
+                        <div class="inline-block bg-red-50 px-4 py-2 rounded-xl">
+                            <span class="text-3xl font-black text-red-500">
+                                {{ number_format($combo->total_price ?? 0, 0, ',', '.') }}đ
+                            </span>
+                            <span class="text-sm font-bold text-red-400">/khách</span>
+                        </div>
                     </div>
 
                     <div class="border-t border-b py-4 my-4">

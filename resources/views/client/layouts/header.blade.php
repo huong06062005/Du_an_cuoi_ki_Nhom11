@@ -26,12 +26,21 @@
                         <span class="text-xs font-black text-blue-600 italic">Chào, {{ Auth::user()->name }}</span>
                     </div>
 
-                    <form action="{{ route('logout') }}" method="POST" class="m-0">
-                        @csrf
-                        <button type="submit" class="border-2 border-slate-800 text-slate-800 px-4 py-2 rounded text-[10px] font-black uppercase tracking-widest hover:bg-red-600 hover:border-red-600 hover:text-white transition-all shadow-sm">
-                            Đăng xuất
-                        </button>
-                    </form>
+                    {{-- NÚT LỊCH SỬ ĐẶT TOUR: Đổi chuẩn theo name('booking.history') của bạn --}}
+                     <a href="{{ route('booking.history') }}" 
+                         class="inline-flex items-center gap-2 border-2 border-slate-800 text-slate-800 hover:bg-slate-100 px-4 py-2 rounded font-bold text-[11px] uppercase tracking-wide transition cursor-pointer">
+                         <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="2.5" stroke="currentColor" class="w-3.5 h-3.5">
+                             <path stroke-linecap="round" stroke-linejoin="round" d="M12 6v6h4.5m4.5 0a9 9 0 1 1-18 0 9 9 0 0 1 18 0Z" />
+                         </svg>
+                         Lịch sử đặt tour
+                     </a>
+
+                    <form action="{{ route('logout') }}" method="POST" class="m-0 inline-block">
+                   @csrf
+                        <button type="submit" class="border-2 border-slate-800 text-slate-800 px-4 py-2 rounded text-[11px] font-bold uppercase tracking-wide hover:bg-red-50 hover:text-red-600 hover:border-red-600 transition">
+                             Đăng xuất
+                         </button>
+                     </form>
                 </div>
             @endguest
         </div>

@@ -56,12 +56,15 @@ class BookingController extends Controller
     /**
      * Hiển thị lịch sử đặt combo của người dùng
      */
-    public function history()
+   public function history()
     {
-        // Lấy danh sách đã đặt kèm thông tin combo
-        $bookings = Booking::with('combo')->latest()->get();
+        // ĐÃ FIX: Chỉ lấy danh sách đã đặt của CHÍNH KHÁCH HÀNG ĐANG ĐĂNG NHẬP để đảm bảo bảo mật
+        $bookings = Booking::where('user_id', auth()->id())
+                            ->with('combo')
+                            ->latest()
+                            ->get();
 
         // Trả về view lịch sử đặt combo của khách hàng
-        return view('client.bookings.history', compact('bookings')); 
+        return view('client.bookings.history', compact('bookings'));
     }
 }

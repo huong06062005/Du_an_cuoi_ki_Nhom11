@@ -69,11 +69,17 @@
                 </div>
             </header>
 
-            {{-- 🔥 ĐÃ XÓA KHỐI SUCCESS CHUNG TẠI ĐÂY ĐỂ TRÁNH TRÙNG LẶP --}}
+            {{-- 🔥 ĐÃ CHÈN LẠI: Khối thông báo thành công viền dọc màu xanh lục phủ rộng toàn bộ các trang Admin --}}
+            @if(session('success'))
+                <div class="alert-box mb-6 p-4 bg-emerald-50 border-l-4 border-emerald-500 rounded-r-xl shadow-sm text-sm text-emerald-800 flex items-center font-semibold transition-all duration-500">
+                    <i class="fas fa-check-circle mr-2 text-emerald-500 text-base"></i>
+                    {{ session('success') }}
+                </div>
+            @endif
 
-            {{-- Hiển thị thông báo thông tin bổ sung --}}
+            {{-- Hiển thị thông báo thông tin bổ sung - Đã cập nhật class alert-box và hiệu ứng transition --}}
             @if(session('info'))
-                <div class="alert-box bg-blue-50 text-blue-600 p-4 rounded-xl mb-6 border border-blue-100 font-bold text-sm flex items-center">
+                <div class="alert-box bg-blue-50 text-blue-600 p-4 rounded-xl mb-6 border border-blue-100 font-bold text-sm flex items-center transition-all duration-500">
                     <i class="fas fa-info-circle mr-2"></i> {{ session('info') }}
                 </div>
             @endif

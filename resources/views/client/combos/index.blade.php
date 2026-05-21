@@ -5,34 +5,38 @@
     <div class="max-w-7xl mx-auto px-4">
         
         {{-- Form Tìm Kiếm và Lọc Nâng Cao --}}
-        <div class="mb-10">
-            <form action="" method="GET" class="bg-white p-6 rounded-2xl shadow-sm border grid grid-cols-1 md:grid-cols-4 items-end gap-4">
-                
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-2">Bạn muốn đi đâu?</label>
-                    <input type="text" name="search" value="{{ request('search') }}"
-                           class="w-full px-4 py-3 rounded-xl border focus:outline-none focus:border-blue-500 text-sm font-medium text-slate-700"
-                           placeholder="Nhập địa điểm (Sapa, Đà Nẵng...)">
-                </div>
-
-                <div>
-                    <label class="block text-sm font-bold text-gray-700 mb-2">Chọn mức giá</label>
-                    <select name="price_range" class="w-full px-4 py-3 rounded-xl border focus:outline-none focus:border-blue-500 text-sm font-bold text-slate-700 cursor-pointer">
-                        <option value="">Tất cả các mức giá</option>
-                        <option value="under_2m" {{ request('price_range') == 'under_2m' ? 'selected' : '' }}>Dưới 2 triệu</option>
-                        <option value="2m_5m" {{ request('price_range') == '2m_5m' ? 'selected' : '' }}>Từ 2 - 5 triệu</option>
-                        <option value="over_5m" {{ request('price_range') == 'over_5m' ? 'selected' : '' }}>Trên 5 triệu</option>
-                    </select>
-                </div>
-
-                <div>
-                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black text-sm uppercase tracking-wider py-3.5 rounded-xl transition cursor-pointer">
-                        TÌM KIẾM NGAY
-                    </button>
-                </div>
-
-            </form>
+<div class="mb-10">
+    {{-- Chuyển sang flex-row để các phần tử tự động co giãn ôm khít thanh tìm kiếm --}}
+    <form action="" method="GET" class="bg-white p-6 rounded-2xl shadow-sm border flex flex-col md:flex-row items-end gap-4 w-full">
+        
+        {{-- 1. Ô Bạn muốn đi đâu (Thêm md:flex-1 để tự động phình to chiếm trọn không gian trống) --}}
+        <div class="w-full md:flex-1">
+            <label class="block text-sm font-bold text-gray-700 mb-2">Bạn muốn đi đâu?</label>
+            <input type="text" name="search" value="{{ request('search') }}"
+                   class="w-full px-4 py-3 rounded-xl border focus:outline-none focus:border-blue-500 text-sm font-medium text-slate-700"
+                   placeholder="Nhập địa điểm (Sapa, Đà Nẵng...)">
         </div>
+
+        {{-- 2. Ô Chọn mức giá (Giữ kích thước cố định vừa vặn md:w-72) --}}
+        <div class="w-full md:w-72">
+            <label class="block text-sm font-bold text-gray-700 mb-2">Chọn mức giá</label>
+            <select name="price_range" class="w-full px-4 py-3 rounded-xl border focus:outline-none focus:border-blue-500 text-sm font-bold text-slate-700 cursor-pointer">
+                <option value="">Tất cả các mức giá</option>
+                <option value="under_2m" {{ request('price_range') == 'under_2m' ? 'selected' : '' }}>Dưới 2 triệu</option>
+                <option value="2m_5m" {{ request('price_range') == '2m_5m' ? 'selected' : '' }}>Từ 2 - 5 triệu</option>
+                <option value="over_5m" {{ request('price_range') == 'over_5m' ? 'selected' : '' }}>Trên 5 triệu</option>
+            </select>
+        </div>
+
+        {{-- 3. Nút Tìm Kiếm Ngay (Thiết lập độ rộng md:w-56 để cân bằng với toàn bộ layout) --}}
+        <div class="w-full md:w-56">
+            <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black text-sm uppercase tracking-wider py-3.5 rounded-xl transition cursor-pointer">
+                TÌM KIẾM NGAY
+            </button>
+        </div>
+
+    </form>
+</div>
 
         <h2 class="text-2xl font-bold mb-6 italic"><i class="fas fa-search mr-2"></i>Kết quả tìm kiếm Combo</h2>
         

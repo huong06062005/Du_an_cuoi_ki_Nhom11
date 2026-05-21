@@ -42,60 +42,58 @@
                     <h2 class="text-3xl font-black text-slate-900 uppercase">Gói Combo Phổ Biến</h2>
                     <div class="h-1.5 w-20 bg-blue-600 mt-2 rounded-full"></div>
                 </div>
-                {{-- ĐÃ CHUẨN HÓA: Giữ nguyên route chuyển hướng sang trang 20 combo sạch lỗi lặp --}}
                 <a href="{{ route('combos.index') }}" class="text-blue-600 font-bold text-sm hover:underline">Xem tất cả combo →</a>
             </div>
 
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-10">
-                {{-- 🔥 ĐÃ CẬP NHẬT: Thêm ->take(6) khống chế cứng hiển thị đúng 6 gói phổ biến nhất ngoài trang chủ --}}
                 @foreach($combos->take(6) as $combo)
-                    <div class="bg-white rounded-[32px] overflow-hidden shadow-[0_10px_40px_rgba(0,0,0,0.04)] hover:shadow-[0_30px_70px_rgba(0,0,0,0.12)] transition-all duration-500 group border border-slate-100 flex flex-col h-full">
+                    <div class="bg-white rounded-[32px] overflow-hidden shadow-[0_10px_40px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_50px_rgba(0,0,0,0.1)] transition-all duration-500 group border border-slate-100 flex flex-col h-full">
+                        
                         {{-- Phần Ảnh Đại Diện Combo --}}
-                        <div class="relative h-80 overflow-hidden bg-slate-100">
+                        <div class="relative h-56 overflow-hidden bg-slate-100">
                             @php
                                 $rawImage = $combo->image_url ?? ($combo->image ?? ($combo->hinh_anh ?? ''));
                                 $displayImageUrl = filter_var($rawImage, FILTER_VALIDATE_URL) ? $rawImage : (empty($rawImage) ? 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80' : asset('storage/' . $rawImage));
                             @endphp
-                            <img src="{{ $displayImageUrl }}" alt="{{ $combo->name ?? $combo->ten_combo }}" class="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" onerror="this.src='https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80';">
+                            <img src="{{ $displayImageUrl }}" alt="{{ $combo->name ?? $combo->ten_combo }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" onerror="this.src='https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80';">
                             
-                            {{-- Hiển thị nhãn nổi bật --}}
+                            {{-- Nhãn bán chạy --}}
                             @if(($combo->is_featured ?? 0) == 1 || ($combo->noi_bat ?? 0) == 1 || ($combo->pho_bien ?? 0) == 1)
-                                <div class="absolute top-6 left-6 bg-red-500 text-white px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-widest shadow-sm">
+                                <div class="absolute top-4 left-4 bg-red-500 text-white px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest shadow-sm">
                                     BÁN CHẠY 🔥
                                 </div>
                             @endif
                         </div>
 
                         {{-- Phần Thông Tin Chi Tiết Gói --}}
-                        <div class="p-10 flex flex-col flex-grow">
-                            <h3 class="font-extrabold text-2xl text-slate-800 mb-2 leading-tight group-hover:text-blue-600 transition-colors line-clamp-2 min-h-[4rem]">
+                        <div class="p-6 flex flex-col flex-grow">
+                            <h3 class="font-extrabold text-lg text-slate-800 mb-1.5 leading-snug group-hover:text-blue-600 transition-colors line-clamp-2 min-h-[3rem]">
                                 {{ $combo->name ?? $combo->ten_combo }}
                             </h3>
                             
-                            <p class="text-xs text-slate-400 mb-6 line-clamp-2 italic">
+                            <p class="text-[11px] text-slate-400 mb-4 line-clamp-2 italic leading-relaxed">
                                 {{ $combo->mo_ta_text ?? ($combo->description ?? $combo->mo_ta) }}
                             </p>
 
                             {{-- Khối Hiển Thị Giá Tiền --}}
-                            <div class="mb-8">
+                            <div class="mb-5">
                                 @php
                                     $currentPrice = $combo->real_price ?? ($combo->price ?? ($combo->gia_tien ?? 0));
                                     $oldPrice = $combo->old_price ?? ($combo->gia_cu ?? ($currentPrice * 1.25));
                                 @endphp
                                 
-                                <div class="text-slate-400 text-sm line-through font-medium mb-1">
+                                <div class="text-slate-400 text-xs line-through font-medium mb-0.5">
                                     {{ number_format($oldPrice, 0, ',', '.') }} VNĐ
                                 </div>
                                 
-                                <div class="flex items-baseline gap-1">
-                                    <span class="text-3xl font-black text-red-500">{{ number_format($currentPrice, 0, ',', '.') }}</span>
-                                    <span class="text-sm font-bold text-red-400">VNĐ</span>
+                                <div class="flex items-baseline gap-0.5">
+                                    <span class="text-2xl font-black text-red-500">{{ number_format($currentPrice, 0, ',', '.') }}</span>
+                                    <span class="text-xs font-bold text-red-400">VNĐ</span>
                                 </div>
                             </div>
 
-                            {{-- Nút Hành Động Đặt Tour --}}
-                            <div class="mt-auto space-y-4">
-                                <a href="#" class="block w-full py-4 rounded-2xl bg-[#1a1a2e] text-white font-black text-xs uppercase tracking-[0.2em] text-center hover:bg-blue-600 transition-all shadow-lg">
+                            <div class="mt-auto">
+                                <a href="#" class="block w-full py-3 rounded-xl bg-[#1a1a2e] text-white font-black text-[10px] uppercase tracking-[0.15em] text-center hover:bg-blue-600 transition-all shadow-md">
                                     ĐẶT TOUR NGAY
                                 </a>
                             </div>

@@ -22,7 +22,7 @@ class ComboSeeder extends Seeder
                 'price' => 3490000,
                 'old_price' => 4200000,
                 'description' => 'Gói combo trọn gói bao gồm vé máy bay khứ hồi, nghỉ dưỡng khách sạn Novotel view sông Hàn và vé vui chơi Bà Nà Hills check-in Cầu Vàng.',
-                'image' => 'https://images.unsplash.com/photo-1555939594-58d7cb561ad1?auto=format&fit=crop&w=800&q=80',
+                'image' => 'https://vcdn1-dulich.vnecdn.net/2022/06/03/cauvang-1654247842-9403-1654247849.jpg?w=1200&h=0&q=100&dpr=1&fit=crop&s=Swd6JjpStebEzT6WARcoOA',
                 'is_featured' => 1,
                 'keyword' => 'Đà Nẵng'
             ],
@@ -31,7 +31,7 @@ class ComboSeeder extends Seeder
                 'price' => 1950000,
                 'old_price' => 2500000,
                 'description' => 'Trải nghiệm cáp treo Sun World Fansipan Legend, di chuyển xe giường nằm VIP khứ hồi và nghỉ dưỡng tại Hotel de la Coupole đẳng cấp Pháp.',
-                'image' => 'https://images.unsplash.com/photo-1528127269322-539801943592?auto=format&fit=crop&w=800&q=80',
+                'image' => 'https://images.vietnamtourism.gov.vn/en//images/2025/sep/0909.sapa-2.jpg',
                 'is_featured' => 1,
                 'keyword' => 'Sapa'
             ],
@@ -40,7 +40,7 @@ class ComboSeeder extends Seeder
                 'price' => 5850000,
                 'old_price' => 6900000,
                 'description' => 'Khám phá trọn vẹn đảo ngọc với vé máy bay khứ hồi, lưu trú Villa Vinpearl Resort & Spa và vé vui chơi không giới hạn VinWonders & Safari.',
-                'image' => 'https://images.unsplash.com/photo-1583212292454-1fe6229603b7?auto=format&fit=crop&w=800&q=80',
+                'image' => 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSPLeQKQrmqxxe9zUCUM1z7MGwKktPEY94UXQ&s',
                 'is_featured' => 1,
                 'keyword' => 'Phú Quốc'
             ],
@@ -49,7 +49,7 @@ class ComboSeeder extends Seeder
                 'price' => 2650000,
                 'old_price' => 3200000,
                 'description' => 'Nghỉ dưỡng sang chảnh tại Mường Thanh Luxury Hạ Long, kết hợp hải trình 6 tiếng ăn buffet hải sản và chèo thuyền Kayak trên vịnh.',
-                'image' => 'https://images.unsplash.com/photo-1524231757912-21f4fe3a7200?auto=format&fit=crop&w=800&q=80',
+                'image' => 'https://bizweb.dktcdn.net/100/101/075/files/ha-long-bay.jpg?v=1767845461645',
                 'is_featured' => 1,
                 'keyword' => 'Hạ Long'
             ],
@@ -58,7 +58,7 @@ class ComboSeeder extends Seeder
                 'price' => 2200000,
                 'old_price' => 2700000,
                 'description' => 'Hành trình di chuyển Vietnam Airlines, lưu trú khách sạn Silk Path Grand Huế sang trọng và thưởng thức show diễn Ký ức Hội An.',
-                'image' => 'https://images.unsplash.com/photo-1571508601936-6ca847b47ae6?auto=format&fit=crop&w=800&q=80',
+                'image' => 'https://cdn-media.sforum.vn/storage/app/media/ctvseo_MH/hu%E1%BA%BF%20mi%E1%BB%81n%20n%C3%A0o/hue-thuoc-mien-nao-thumbnail.jpg',
                 'is_featured' => 1,
                 'keyword' => 'Huế'
             ],
@@ -67,18 +67,17 @@ class ComboSeeder extends Seeder
                 'price' => 3100000,
                 'old_price' => 3800000,
                 'description' => 'Trải nghiệm xe giường nằm phòng đôi VIP Hà Nội - Hà Giang, thuê xe máy tự lái chinh phục đèo Mã Pì Lèng và sông Nho Quế.',
-                'image' => 'https://images.unsplash.com/photo-1605538032432-a9f0c8d9baac?auto=format&fit=crop&w=800&q=80',
+                'image' => 'https://images.vietnamtourism.gov.vn/vn/images/2019/nhung-diem-chup-hoa-tam-giac-mach-dep-nhat-o-ha-giang.jpg',
                 'is_featured' => 1,
                 'keyword' => 'Hà Giang'
             ],
 
-            // 🌟 9 COMBO THƯỜNG KHÁC (is_featured = 0)
             [
                 'name' => 'Combo Sapa Cuối Tuần - Nghỉ dưỡng mây ngàn giá rẻ',
                 'price' => 1250000,
                 'old_price' => 1600000,
                 'description' => 'Bao gồm xe Limousine khứ hồi và phòng nghỉ view thung lũng Mường Hoa thơ mộng.',
-                'image' => 'https://images.unsplash.com/photo-1508444845599-a3bfb667e402?auto=format&fit=crop&w=800&q=80',
+                'image' => 'https://vcdn1-dulich.vnecdn.net/2022/05/10/324251873-jpeg-1163-1650134032-1713-1652148548.jpg?w=680&h=0&q=100&dpr=2&fit=crop&s=jIKaf2njsjxp365gVgKsOA',
                 'is_featured' => 0,
                 'keyword' => 'Sapa'
             ],
@@ -87,7 +86,7 @@ class ComboSeeder extends Seeder
                 'price' => 1600000,
                 'old_price' => 1990000,
                 'description' => 'Gói di chuyển bằng xe 16 chỗ trọn gói tham quan Ngũ Hành Sơn, chùa Linh Ứng và cầu Rồng.',
-                'image' => 'https://images.unsplash.com/photo-1559592413-7ece35937723?auto=format&fit=crop&w=800&q=80',
+                'image' => 'https://ik.imagekit.io/tvlk/blog/2022/06/ban-do-du-lich-da-nang-10.jpg',
                 'is_featured' => 0,
                 'keyword' => 'Đà Nẵng'
             ],
@@ -96,7 +95,7 @@ class ComboSeeder extends Seeder
                 'price' => 1890000,
                 'old_price' => 2300000,
                 'description' => 'Dành cho các bạn trẻ thích khám phá: Vé máy bay Vietjet và xe máy ga giao tận nơi tại sân bay.',
-                'image' => 'https://images.unsplash.com/photo-1544735716-392fe2489ffa?auto=format&fit=crop&w=800&q=80',
+                'image' => 'https://statics.vinpearl.com/phuot-phu-quoc-bang-xe-may-5_1630807454.jpg',
                 'is_featured' => 0,
                 'keyword' => 'Phú Quốc'
             ],
@@ -105,7 +104,7 @@ class ComboSeeder extends Seeder
                 'price' => 2100000,
                 'old_price' => 2500000,
                 'description' => 'Nghỉ ngơi thư giãn tại Mường Thanh Luxury và tắm biển bãi cháy mát lạnh.',
-                'image' => 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80',
+                'image' => 'https://paddingtonbayviewhalong.com/vnt_upload/news/10_2024/du_lich_ha_long_mua_thu_3.jpg',
                 'is_featured' => 0,
                 'keyword' => 'Hạ Long'
             ],
@@ -123,7 +122,7 @@ class ComboSeeder extends Seeder
                 'price' => 2800000,
                 'old_price' => 3500000,
                 'description' => 'Combo đặc biệt cho cặp đôi gồm phòng cao cấp, tiệc tối lãng mạn và vé xem show Ký ức.',
-                'image' => 'https://images.unsplash.com/photo-1540555700478-4be289fbecef?auto=format&fit=crop&w=800&q=80',
+                'image' => 'https://images.vietnamtourism.gov.vn/vn//images/2019/CNMN/17.8._Silk_Path_Grand_Hue_Hotel_%26_Spa_3.jpg',
                 'is_featured' => 0,
                 'keyword' => 'Huế'
             ],
@@ -132,7 +131,7 @@ class ComboSeeder extends Seeder
                 'price' => 1750000,
                 'old_price' => 2100000,
                 'description' => 'Vé cáp treo Fansipan kèm xe Limousine Sao Việt chạy cao tốc êm ái.',
-                'image' => 'https://images.unsplash.com/photo-1624314138470-5a2f24623f10?auto=format&fit=crop&w=800&q=80',
+                'image' => 'https://ik.imagekit.io/tvlk/blog/2024/11/t0OyiydT-Untitled-design-1.png',
                 'is_featured' => 0,
                 'keyword' => 'Sapa'
             ],
@@ -141,7 +140,7 @@ class ComboSeeder extends Seeder
                 'price' => 6900000,
                 'old_price' => 8500000,
                 'description' => 'Gói Luxury cao cấp nhất bảng: Villa hồ bơi riêng, vé máy bay Vietnam Airlines giờ đẹp.',
-                'image' => 'https://images.unsplash.com/photo-1571003123894-1f0594d2b5d9?auto=format&fit=crop&w=800&q=80',
+                'image' => 'https://images.trvl-media.com/lodging/35000000/34020000/34014200/34014178/f865e902.jpg?impolicy=resizecrop&rw=575&rh=575&ra=fill',
                 'is_featured' => 0,
                 'keyword' => 'Phú Quốc'
             ],
@@ -150,7 +149,7 @@ class ComboSeeder extends Seeder
                 'price' => 2990000,
                 'old_price' => 3600000,
                 'description' => 'Sự kết hợp hoàn hảo giữa vé Bà Nà Hills và phòng nghỉ Novotel đẳng cấp quốc tế.',
-                'image' => 'https://images.unsplash.com/photo-1568849676085-51415703900f?auto=format&fit=crop&w=800&q=80',
+                'image' => 'https://product.hstatic.net/200000735165/product/ha_web__1__7679513993774a318b178ec426ba5cef.jpg',
                 'is_featured' => 0,
                 'keyword' => 'Đà Nẵng'
             ],

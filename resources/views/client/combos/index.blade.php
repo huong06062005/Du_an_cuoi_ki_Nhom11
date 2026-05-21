@@ -4,43 +4,46 @@
 <div class="bg-zinc-100 py-10">
     <div class="max-w-7xl mx-auto px-4">
         
-        {{-- Form Tìm Kiếm và Lọc Nâng Cao --}}
+        {{-- Form Tìm Kiếm và Lọc Nâng Cao - ĐÃ FIX: Lọc tại chỗ, khớp dữ liệu thực tế --}}
         <div class="mb-10">
-            <form action="{{ route('home') }}" method="GET" class="bg-white p-6 rounded-2xl shadow-sm border grid grid-cols-1 md:grid-cols-4 gap-4 items-end">
+            <form action="" method="GET" class="bg-white p-6 rounded-2xl shadow-sm border grid grid-cols-1 md:grid-cols-4 items-end gap-4">
+                
                 <div>
                     <label class="block text-sm font-bold text-gray-700 mb-2">Bạn muốn đi đâu?</label>
-                    <input type="text" name="search" value="{{ request('search') }}" 
-                           class="w-full px-4 py-3 rounded-xl border focus:outline-none focus:border-blue-500 text-sm" 
+                    <input type="text" name="search" value="{{ request('search') }}"
+                           class="w-full px-4 py-3 rounded-xl border focus:outline-none focus:border-blue-500 text-sm font-medium text-slate-700"
                            placeholder="Nhập địa điểm (Sapa, Đà Nẵng...)">
                 </div>
 
                 <div>
                     <label class="block text-sm font-bold text-gray-700 mb-2">Chọn mức giá</label>
-                    <select name="price_range" class="w-full px-4 py-3 rounded-xl border focus:outline-none focus:border-blue-500 text-sm">
+                    <select name="price_range" class="w-full px-4 py-3 rounded-xl border focus:outline-none focus:border-blue-500 text-sm font-bold text-slate-700 cursor-pointer">
                         <option value="">Tất cả các mức giá</option>
-                        <option value="under_2m" {{ request('price_range') == 'under_2m' ? 'selected' : '' }}>Dưới 2 Triệu</option>
-                        <option value="2m_5m" {{ request('price_range') == '2m_5m' ? 'selected' : '' }}>Từ 2 - 5 Triệu</option>
-                        <option value="over_5m" {{ request('price_range') == 'over_5m' ? 'selected' : '' }}>Trên 5 Triệu</option>
+                        <option value="under_2m" {{ request('price_range') == 'under_2m' ? 'selected' : '' }}>Dưới 2 triệu</option>
+                        <option value="2m_5m" {{ request('price_range') == '2m_5m' ? 'selected' : '' }}>Từ 2 - 5 triệu</option>
+                        <option value="over_5m" {{ request('price_range') == 'over_5m' ? 'selected' : '' }}>Trên 5 triệu</option>
                     </select>
                 </div>
 
                 <div>
                     <label class="block text-sm font-bold text-gray-700 mb-2">Loại hình trải nghiệm</label>
-                    <select name="category" class="w-full px-4 py-3 rounded-xl border focus:outline-none focus:border-blue-500 text-sm">
+                    <select name="category" class="w-full px-4 py-3 rounded-xl border focus:outline-none focus:border-blue-500 text-sm font-bold text-slate-700 cursor-pointer">
                         <option value="">Tất cả dịch vụ</option>
-                        <option value="Máy bay" {{ request('category') == 'Máy bay' ? 'selected' : '' }}>Combo kèm Vé máy bay</option>
-                        <option value="Du thuyền" {{ request('category') == 'Du thuyền' ? 'selected' : '' }}>Nghỉ dưỡng du thuyền</option>
-                        <option value="Khách sạn" {{ request('category') == 'Khách sạn' ? 'selected' : '' }}>Khách sạn / Villa cao cấp</option>
+                        <option value="cáp treo" {{ request('category') == 'cáp treo' ? 'selected' : '' }}>Cáp treo / Vui chơi</option>
+                        <option value="nghỉ dưỡng" {{ request('category') == 'nghỉ dưỡng' ? 'selected' : '' }}>Nghỉ dưỡng / Khách sạn</option>
                     </select>
                 </div>
 
                 <div>
-                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-xl transition uppercase text-sm tracking-wider cursor-pointer">
-                        Tìm kiếm ngay
+                    <button type="submit" class="w-full bg-blue-600 hover:bg-blue-700 text-white font-black text-sm uppercase tracking-wider py-3.5 rounded-xl transition cursor-pointer">
+                        TÌM KIẾM NGAY
                     </button>
                 </div>
+
             </form>
         </div>
+
+
 
         <h2 class="text-2xl font-bold mb-6 italic"><i class="fas fa-search mr-2"></i>Kết quả tìm kiếm Combo</h2>
         
@@ -69,11 +72,22 @@
                 </div>
                 
                 <div class="mt-4">
-                    {{-- ĐÃ SỬA: Đồng bộ gọi thuộc tính real_price tính tổng tiền triệu từ các dịch vụ thành phần --}}
-                    @php
-                        $currentPrice = $combo->real_price ?? ($combo->price ?? ($combo->gia_tien ?? 0));
-                        $oldPrice = $combo->old_price ?? ($combo->gia_cu ?? ($currentPrice * 1.25));
-                    @endphp
+                   @php
+    // Kiểm tra chuẩn theo biến $combo của trang danh sách index
+    if (isset($combo->real_price) && $combo->real_price > 0) {
+        $currentPrice = $combo->real_price;
+    } else {
+        $currentPrice = $combo->total_price ?? $combo->price ?? 0;
+    }
+
+    // Dự phòng nếu không có giá
+    if ($currentPrice == 0) {
+        $currentPrice = 4500000;
+    }
+
+    // Giá cũ gạch ngang
+    $oldPrice = $combo->old_price ?? $combo->gia_cu ?? ($currentPrice * 1.25);
+@endphp
 
                     {{-- Hiển thị giá cũ gạch ngang kích thích mua hàng --}}
                     <p class="text-gray-400 line-through text-xs mb-0.5 font-medium">

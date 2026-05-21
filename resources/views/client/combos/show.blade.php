@@ -24,12 +24,16 @@
                         {{ $combo->name }}
                     </h1>
 
-                  {{-- KHỐI HIỂN THỊ GIÁ ĐỒNG BỘ 100% VỚI INDEX --}}
-                    @php
-                        // Đưa công thức quét giá chuẩn từ file index sang để đồng bộ dữ liệu
-                        $currentPrice = $combo->real_price ?? ($combo->price ?? ($combo->gia_tien ?? 0));
-                        $oldPrice = $combo->old_price ?? ($combo->gia_cu ?? ($currentPrice * 1.25));
-                    @endphp
+              @php
+                 // Đồng bộ logic: Ưu tiên real_price nếu lớn hơn 0 để tránh bug nhận giá 0.00 từ total_price
+                if (isset($combo->real_price) && $combo->real_price > 0) {
+                 $currentPrice = $combo->real_price;
+                } else {
+                $currentPrice = $combo->total_price ?? $combo->price ?? 0;
+               }
+
+                 $oldPrice = $combo->old_price ?? ($currentPrice * 1.25); 
+             @endphp
 
                     <div class="mb-6">
                         {{-- Giá cũ gạch ngang (nếu có giá cũ hoặc tự tính) --}}
@@ -37,13 +41,12 @@
                             {{ number_format($oldPrice, 0, ',', '.') }}đ
                         </p>
 
-                        
                         <div class="inline-block bg-red-50 px-4 py-2 rounded-xl">
-                            <span class="text-3xl font-black text-red-500">
-                                {{ number_format($combo->total_price ?? 0, 0, ',', '.') }}đ
-                            </span>
+                             <span class="text-3xl font-black text-red-500">
+                               {{ number_format($currentPrice, 0, ',', '.') }}đ
+                             </span>
                             <span class="text-sm font-bold text-red-400">/khách</span>
-                        </div>
+                    </div>
                     </div>
 
                     <div class="border-t border-b py-4 my-4">

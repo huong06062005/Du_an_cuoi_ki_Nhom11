@@ -94,17 +94,21 @@
                             {{-- Khối Hiển Thị Giá Tiền (ĐÃ CẤP CỨU BUG CHỐNG 0 VNĐ ĐA TẦNG) --}}
                             <div class="mb-5">
                                 @php
-                                    // Kiểm tra tất cả các trường có thể lưu giá bao gồm total_price mà trang danh sách đang dùng
-                                    $currentPrice = $combo->total_price ?? ($combo->real_price ?? ($combo->price ?? ($combo->gia_tien ?? 0)));
-                                    
-                                    // Cơ chế dự phòng: Nếu gói này bị trống giá hoàn toàn, tự động mồi giá mẫu để giao diện không bị xấu
-                                    if ($currentPrice == 0) {
-                                        $currentPrice = 4500000; 
-                                    }
+        // Đã sửa: Kiểm tra nếu real_price lớn hơn 0 thì ưu tiên lấy, nếu không mới xét đến total_price
+        if (isset($combo->real_price) && $combo->real_price > 0) {
+            $currentPrice = $combo->real_price;
+        } else {
+            $currentPrice = $combo->total_price ?? $combo->price ?? 0;
+        }
 
-                                    // Tạo giá cũ gạch ngang cao hơn giá bán 25% làm hiệu ứng khuyến mãi
-                                    $oldPrice = $combo->old_price ?? ($combo->gia_cu ?? ($currentPrice * 1.25));
-                                @endphp
+        // Cơ chế dự phòng hoàn toàn nếu cả 2 trường đều bằng 0
+        if ($currentPrice == 0) {
+            $currentPrice = 4500000;
+        }
+
+        // Tạo giá cũ gạch ngang tăng 25% làm hiệu ứng khuyến mãi
+        $oldPrice = $combo->old_price ?? $combo->gia_cu ?? ($currentPrice * 1.25);
+    @endphp
                                 
                                 {{-- Hiển thị giá cũ gạch ngang --}}
                                 <div class="text-slate-400 text-xs line-through font-medium mb-0.5">

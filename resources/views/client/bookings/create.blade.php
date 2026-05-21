@@ -26,11 +26,23 @@
                 <textarea name="customer_note" rows="3" class="w-full bg-gray-50 border-b-2 border-gray-200 p-3 outline-none focus:border-blue-600 transition">{{ old('customer_note') }}</textarea>
             </div>
 
-        
+               @php
+    // Kiểm tra nếu real_price tồn tại và lớn hơn 0 thì ưu tiên lấy, nếu không mới lấy total_price
+    if (isset($combo->real_price) && $combo->real_price > 0) {
+        $bookingPrice = $combo->real_price;
+    } else {
+        $bookingPrice = $combo->total_price ?? $combo->price ?? 0;
+    }
+
+    // Cơ chế dự phòng nếu cả 2 bằng 0
+    if ($bookingPrice == 0) {
+        $bookingPrice = 4500000;
+    }
+@endphp
             <div class="mb-8 p-4 bg-zinc-50 rounded-2xl border border-dashed flex justify-between items-center text-sm">
                 <span class="text-gray-600 font-bold uppercase tracking-wide">Tổng tiền thanh toán:</span>
                 <span class="text-red-600 font-extrabold text-xl">
-                    {{ number_format($combo->total_price ?? 0, 0, ',', '.') }}đ
+                    {{ number_format($bookingPrice, 0, ',', '.') }}đ
                 </span>
             </div>
 

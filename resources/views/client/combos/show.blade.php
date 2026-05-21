@@ -13,9 +13,12 @@
         <div class="bg-white rounded-3xl shadow-sm border overflow-hidden grid grid-cols-1 md:grid-cols-2 gap-8 p-6 md:p-8">
             
             <div>
-                <img src="{{ \Illuminate\Support\Str::startsWith($combo->image, ['http://', 'https://']) ? $combo->image : asset('storage/'.$combo->image) }}" 
-                     class="w-full h-80 md:h-[400px] object-cover rounded-2xl shadow-inner" 
-                     alt="{{ $combo->name }}">
+                <div>
+    {{-- Đổi toàn bộ sang image_url để hiển thị đúng ảnh riêng từ Database --}}
+    <img src="{{ \Illuminate\Support\Str::startsWith($combo->image_url, ['http://', 'https://']) ? $combo->image_url : asset('storage/'.$combo->image_url) }}" 
+         class="w-full h-80 md:h-[400px] object-cover rounded-2xl shadow-inner" 
+         alt="{{ $combo->name }}">
+</div>
             </div>
 
             <div class="flex flex-col justify-between">

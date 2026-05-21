@@ -45,36 +45,18 @@
 
         <h2 class="text-2xl font-bold mb-6 italic"><i class="fas fa-search mr-2"></i>Kết quả tìm kiếm Combo</h2>
         
-        {{-- lưới hiển thị danh sách Card Combo --}}
+        {{-- Lưới hiển thị danh sách Card Combo --}}
         <div class="grid grid-cols-1 md:grid-cols-4 gap-6">
             @forelse($combos as $combo)
             <div class="bg-white rounded-xl shadow-sm border p-4 flex flex-col justify-between hover:shadow-md transition group">
                 <div>
                     <div class="overflow-hidden rounded-lg mb-3 h-40 w-full relative">
 
-                        @php
-                            // --- Phần xử lý giá tiền ---
-                            if (isset($combo->real_price) && $combo->real_price > 0) {
-                                $currentPrice = $combo->real_price;
-                            } else {
-                                $currentPrice = $combo->total_price ?? $combo->price ?? 0;
-                            }
-                            if ($currentPrice == 0) { $currentPrice = 4500000; }
-                            $oldPrice = $combo->old_price ?? $combo->gia_cu ?? ($currentPrice * 1.25);
+                        {{-- ĐỔI THÀNH IMAGE_URL ĐỂ LẤY ĐÚNG ẢNH KHÔNG TRÙNG TRONG DATABASE --}}
+                        <img src="{{ $combo->image_url }}" 
+                             class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500 rounded-lg" 
+                             alt="{{ $combo->name ?? $combo->ten_combo }}">
 
-                            // --- XỬ LÝ ĐƯỜNG DẪN ẢNH SẠCH SẼ TỪ DATABASE ---
-                            $rawImage = $combo->getRawOriginal('image') ?? ($combo->getRawOriginal('image_url') ?? '');
-                            $displayImageUrl = filter_var($rawImage, FILTER_VALIDATE_URL) ? $rawImage : (empty($rawImage) ? 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600' : asset($rawImage));
-                        @endphp
-
-                        {{-- Thẻ hiển thị ảnh --}}
-                        <img src="{{ $displayImageUrl }}" 
-                            class="h-full w-full object-cover group-hover:scale-105 transition-transform duration-500 rounded-lg" 
-                            alt="{{ $combo->name ?? $combo->ten_combo }}">
-
-                        
-                        
-                        {{-- Hiển thị tag bán chạy --}}
                         @if(($combo->is_featured ?? 0) == 1 || ($combo->noi_bat ?? 0) == 1)
                             <div class="absolute top-2 left-2 bg-red-500 text-white px-2.5 py-1 rounded-full text-[9px] font-black uppercase tracking-wider shadow-sm">
                                 BÁN CHẠY 🔥
@@ -88,14 +70,14 @@
                 </div>
                 
                 <div class="mt-4">
-                    {{-- Hiển thị giá cũ gạch ngang kích thích mua hàng --}}
+                    {{-- Tính giá cũ tự động --}}
                     <p class="text-gray-400 line-through text-xs mb-0.5 font-medium">
-                        {{ number_format($oldPrice, 0, ',', '.') }}đ
+                        {{ number_format(($combo->old_price ?? $combo->gia_cu ?? (($combo->real_price ?? $combo->total_price ?? $combo->price ?? 4500000) * 1.25)), 0, ',', '.') }}đ
                     </p>
 
-                    {{-- Giá bán chính thức màu đỏ chuẩn chỉ --}}
+                    {{-- Hiện giá đỏ chuẩn của bạn --}}
                     <p class="text-red-600 font-black mb-4 text-lg">
-                        {{ number_format($currentPrice, 0, ',', '.') }}đ
+                        {{ number_format(($combo->real_price ?? $combo->total_price ?? $combo->price ?? 0), 0, ',', '.') }}đ
                     </p>
 
                     <a href="{{ route('combos.show', $combo->id) }}" class="block text-center bg-blue-50 hover:bg-blue-100 text-blue-600 py-2.5 rounded-xl text-xs font-bold transition tracking-wider uppercase">

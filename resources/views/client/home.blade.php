@@ -65,21 +65,28 @@
                 @foreach($combos->take(6) as $combo)
                     <div class="bg-white rounded-[32px] overflow-hidden shadow-[0_10px_40px_rgba(0,0,0,0.04)] hover:shadow-[0_20px_50px_rgba(0,0,0,0.1)] transition-all duration-500 group border border-slate-100 flex flex-col h-full">
                         
-                        {{-- Phần Ảnh Đại Diện Combo --}}
-                        <div class="relative h-56 overflow-hidden bg-slate-100">
-                            @php
-                                $rawImage = $combo->image_url ?? ($combo->image ?? ($combo->hinh_anh ?? ''));
-                                $displayImageUrl = filter_var($rawImage, FILTER_VALIDATE_URL) ? $rawImage : (empty($rawImage) ? 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80' : asset('storage/' . $rawImage));
-                            @endphp
-                            <img src="{{ $displayImageUrl }}" alt="{{ $combo->name ?? $combo->ten_combo }}" class="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700" onerror="this.src='https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80';">
-                            
-                            {{-- Nhãn bán chạy --}}
-                            @if(($combo->is_featured ?? 0) == 1 || ($combo->noi_bat ?? 0) == 1 || ($combo->pho_bien ?? 0) == 1)
-                                <div class="absolute top-4 left-4 bg-red-500 text-white px-3 py-1 rounded-full text-[9px] font-black uppercase tracking-widest shadow-sm">
-                                    BÁN CHẠY 🔥
-                                </div>
-                            @endif
-                        </div>
+          {{-- Phần Ảnh Đại Diện Combo --}}
+            <div class="relative h-56 overflow-hidden bg-slate-100">
+            @php
+                $rawImage = $combo->image_url ?? ($combo->image ?? ($combo->hinh_anh ?? ''));
+                $displayImageUrl = filter_var($rawImage, FILTER_VALIDATE_URL) ? $rawImage : (empty($rawImage) ? 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=600' : asset($rawImage));
+
+                // 🌟 ĐIỀU KIỆN CÔ LẬP: Chỉ ghi đè đúng duy nhất link ảnh cho gói Cố đô Huế trên trang chủ 🌟
+                $comboNameLower = Str::lower($combo->name ?? $combo->ten_combo ?? '');
+                if (Str::contains($comboNameLower, 'cố đô huế') || (Str::contains($comboNameLower, 'huế') && Str::contains($comboNameLower, 'cổ kính'))) {
+                    $displayImageUrl = 'https://img1.kienthucvui.vn/uploads/2022/01/03/hinh-anh-co-do-hue_102215163.jpg';
+                }
+            @endphp
+            
+            <img src="{{ $displayImageUrl }}" alt="{{ $combo->name ?? $combo->ten_combo }}" class="w-full h-full object-cover">
+
+            {{-- Nhãn bán chạy --}}
+            @if(($combo->is_featured ?? 0) == 1 || ($combo->noi_bat ?? 0) == 1 || ($combo->pho_bien ?? 0) == 1)
+                <div class="absolute top-4 left-4 bg-red-500 text-white px-3 py-1 rounded-full text-[9px] font-bold uppercase tracking-wider">
+                    BÁN CHẠY 🔥
+                </div>
+            @endif
+        </div>
 
                         {{-- Phần Thông Tin Chi Tiết Gói --}}
                         <div class="p-6 flex flex-col flex-grow">

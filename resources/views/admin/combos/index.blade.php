@@ -2,15 +2,10 @@
 @section('title', 'QUẢN LÝ COMBO')
 
 @section('admin_content')
-@if(session('success'))
-    <div class="mb-6 p-4 bg-emerald-50 border-l-4 border-emerald-500 rounded-r-xl shadow-sm text-sm text-emerald-800 flex items-center font-semibold">
-        <i class="fas fa-check-circle mr-2 text-emerald-500 text-base"></i>
-        {{ session('success') }}
-    </div>
-@endif
 
+{{-- Giữ lại thông báo lỗi hệ thống phòng khi có trục trặc DB --}}
 @if(session('error'))
-    <div class="mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-xl shadow-sm text-sm text-red-800 flex items-center font-semibold">
+    <div class="alert-box mb-6 p-4 bg-red-50 border-l-4 border-red-500 rounded-r-xl shadow-sm text-sm text-red-800 flex items-center font-semibold transition-all duration-500">
         <i class="fas fa-exclamation-triangle mr-2 text-red-500 text-base"></i>
         {{ session('error') }}
     </div>
@@ -38,20 +33,25 @@
                 @forelse($combos as $item)
                 <tr class="hover:bg-slate-50/50 transition-colors">
                     <td class="p-4">
-                        <img src="{{ $item->image_url }}" alt="Ảnh Combo" class="w-24 h-16 object-cover rounded-xl border border-slate-200 p-0.5 shadow-sm bg-white">
+                        {{-- TỐI ƯU: Tự động bẫy lỗi hiển thị đường dẫn ảnh linh hoạt --}}
+                        @php
+                            $comboImage = $item->image ?? ($item->hinh_anh ?? '');
+                            $displayImg = filter_var($comboImage, FILTER_VALIDATE_URL) ? $comboImage : (empty($comboImage) ? 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80' : asset('storage/' . $comboImage));
+                        @endphp
+                        <img src="{{ $displayImg }}" alt="Ảnh Combo" class="w-24 h-16 object-cover rounded-xl border border-slate-200 p-0.5 shadow-sm bg-white" onerror="this.src='https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=800&q=80';">
                     </td>
                     
                     <td class="p-4">
                         <div class="font-bold text-slate-800 text-base">{{ $item->name ?? ($item->ten_combo ?? 'Chưa đặt tên') }}</div>
                         <div class="text-xs text-slate-400 mt-1 line-clamp-1 italic max-w-xl">
-                            {{ $item->description ?? ($item->mo_ta ?? 'Chưa có mô tả ngắn gọn cho gói combo này.') }}
+                            {{-- TỐI ƯU: Tự động dọn dẹp tag ẩn kỹ thuật ngoài trang quản trị cho đẹp mắt --}}
+                            {{ trim(str_replace('[POPULAR]', '', $item->description ?? ($item->mo_ta ?? 'Chưa có mô tả ngắn gọn cho gói combo này.'))) }}
                         </div>
                     </td>
                     
                     <td class="p-4">
                         <span class="text-blue-600 font-bold text-base bg-blue-50/60 px-3 py-1.5 rounded-lg border border-blue-100/50 inline-block">
                             @php
-                                // ĐÃ SỬA: Ưu tiên lấy thuộc tính ảo real_price đã cấu hình tự động tính tổng tiền ở Model Combo
                                 $displayPrice = $item->real_price ?? ($item->price ?? ($item->gia_tien ?? 0));
                             @endphp
                             {{ $displayPrice > 0 ? number_format($displayPrice, 0, ',', '.') . 'đ' : '0đ' }}

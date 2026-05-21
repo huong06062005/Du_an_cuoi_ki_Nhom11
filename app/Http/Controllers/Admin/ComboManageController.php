@@ -82,6 +82,8 @@ class ComboManageController extends Controller
             $combo = Combo::create($safeInsertData);
             $combo->services()->attach($request->services);
             DB::commit();
+            
+            // Đồng bộ duy nhất một flash session success
             return redirect()->route('admin.combos.index')->with('success', 'Tạo combo thành công!');
         } catch (\Exception $e) {
             DB::rollBack();
@@ -175,6 +177,7 @@ class ComboManageController extends Controller
         $combo = Combo::findOrFail($id);
         $combo->services()->detach();
         $combo->delete();
+        
         return redirect()->route('admin.combos.index')->with('success', 'Đã xóa!');
     }
-}
+}ss

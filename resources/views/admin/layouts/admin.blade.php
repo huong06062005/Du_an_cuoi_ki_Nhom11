@@ -69,16 +69,11 @@
                 </div>
             </header>
 
-            {{-- Hiển thị thông báo thành công của hệ thống --}}
-            @if(session('success'))
-                <div class="bg-emerald-50 text-emerald-600 p-4 rounded-xl mb-6 border border-emerald-100 font-bold text-sm flex items-center">
-                    <i class="fas fa-check-circle mr-2"></i> {{ session('success') }}
-                </div>
-            @endif
+            {{-- 🔥 ĐÃ XÓA KHỐI SUCCESS CHUNG TẠI ĐÂY ĐỂ TRÁNH TRÙNG LẶP --}}
 
             {{-- Hiển thị thông báo thông tin bổ sung --}}
             @if(session('info'))
-                <div class="bg-blue-50 text-blue-600 p-4 rounded-xl mb-6 border border-blue-100 font-bold text-sm flex items-center">
+                <div class="alert-box bg-blue-50 text-blue-600 p-4 rounded-xl mb-6 border border-blue-100 font-bold text-sm flex items-center">
                     <i class="fas fa-info-circle mr-2"></i> {{ session('info') }}
                 </div>
             @endif
@@ -87,5 +82,36 @@
         </main>
     </div>
 
+    {{-- SCRIPT ẨN MƯỢT MÀ KHÔNG BỊ XUNG ĐỘT CLASS TAILWIND --}}
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const alerts = document.querySelectorAll('.alert-box');
+            
+            alerts.forEach(function(alert) {
+                // Thêm sẵn các thuộc tính transition bằng JS để đảm bảo chạy mượt
+                alert.style.transition = "all 0.6s cubic-bezier(0.4, 0, 0.2, 1)";
+                alert.style.opacity = "1";
+                alert.style.overflow = "hidden";
+                alert.style.maxHeight = alert.offsetHeight + "px";
+
+                setTimeout(function() {
+                    // Thực hiện hiệu ứng fade out và thu hẹp chiều cao cùng lúc
+                    alert.style.opacity = '0';
+                    alert.style.transform = 'translateY(-15px)';
+                    alert.style.maxHeight = '0px';
+                    alert.style.paddingTop = '0px';
+                    alert.style.paddingBottom = '0px';
+                    alert.style.marginTop = '0px';
+                    alert.style.marginBottom = '0px';
+                    alert.style.borderWidth = '0px';
+                    
+                    // Xóa hẳn khỏi cấu trúc trang sau khi ẩn xong hẳn
+                    setTimeout(function() {
+                        alert.remove();
+                    }, 600);
+                }, 3000); // 3000ms = 3 giây tự động ẩn
+            });
+        });
+    </script>
 </body>
 </html>

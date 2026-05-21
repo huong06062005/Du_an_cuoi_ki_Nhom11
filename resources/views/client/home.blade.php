@@ -13,24 +13,40 @@
                 Khách sạn + Máy bay + Tham quan giá tốt nhất
             </p>
 
-            {{-- Form Tìm Kiếm Nhanh --}}
-            <div class="max-w-6xl mx-auto bg-white p-5 rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.3)] flex flex-col md:flex-row items-center gap-4 border border-white/20">
-                <div class="flex-1 w-full text-left px-6 border-r border-slate-100">
-                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Giá từ</label>
-                    <input type="text" value="1,000,000" class="w-full focus:outline-none font-bold text-slate-700 text-lg bg-transparent">
-                </div>
-                <div class="flex-1 w-full text-left px-6 border-r border-slate-100">
-                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Giá đến</label>
-                    <input type="text" value="5,000,000" class="w-full focus:outline-none font-bold text-slate-700 text-lg bg-transparent">
-                </div>
-                <div class="flex-1 w-full text-left px-6">
-                    <label class="block text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">Địa điểm</label>
-                    <input type="text" placeholder="Đà Nẵng..." class="w-full focus:outline-none font-bold text-slate-700 text-lg bg-transparent">
-                </div>
-                <button class="bg-blue-600 hover:bg-blue-700 text-white px-12 py-5 rounded-xl font-black uppercase tracking-widest transition-all shadow-xl shadow-blue-200">
-                    TÌM COMBO
-                </button>
-            </div>
+           {{-- Khối banner trang chủ giữ nguyên thiết kế ban đầu --}}
+<div class="relative w-full h-[500px] bg-cover bg-center flex flex-col justify-center items-center text-center px-4" style="background-image: url('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?w=1600');">
+    <div class="absolute inset-0 bg-black/20"></div>
+    
+    <div class="relative z-10 mb-8">
+        <h1 class="text-white text-5xl font-black uppercase tracking-wider mb-2 drop-shadow-md">KHÁM PHÁ THẾ GIỚI VỚI COMBO TIẾT KIỆM</h1>
+        <p class="text-white/90 text-sm font-medium drop-shadow">Khách sạn + Máy bay + Tham quan giá tốt nhất</p>
+    </div>
+
+    {{--Giao diện thanh tìm kiếm nhanh trang chủ của bạn --}}
+    <div class="relative z-10 w-full max-w-5xl bg-white p-5 rounded-2xl shadow-[0_20px_60px_rgba(0,0,0,0.15)] flex items-center">
+        
+        <div class="flex-1 text-left px-6 border-r border-slate-100">
+            <label class="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Giá từ</label>
+            <input type="text" value="1,000,000" class="w-full focus:outline-none font-bold text-slate-700 bg-transparent">
+        </div>
+
+        <div class="flex-1 text-left px-6 border-r border-slate-100">
+            <label class="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Giá đến</label>
+            <input type="text" value="5,000,000" class="w-full focus:outline-none font-bold text-slate-700 bg-transparent">
+        </div>
+
+        <div class="flex-1 text-left px-6">
+            <label class="block text-[9px] font-black text-slate-400 uppercase tracking-widest mb-1">Địa điểm</label>
+            <input type="text" placeholder="Đà Nẵng..." class="w-full focus:outline-none font-bold text-slate-700 bg-transparent">
+        </div>
+
+        <button class="bg-blue-600 hover:bg-blue-700 text-white px-10 py-4 rounded-xl font-black text-sm uppercase tracking-wider transition cursor-pointer flex-shrink-0">
+            TÌM COMBO
+        </button>
+        
+    </div>
+ </div>
+
         </div>
     </div>
 

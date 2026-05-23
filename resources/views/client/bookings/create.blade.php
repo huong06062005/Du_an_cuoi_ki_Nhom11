@@ -9,16 +9,25 @@
             @csrf
             <input type="hidden" name="combo_id" value="{{ $combo->id }}">
             
+            @php
+                if (isset($combo->real_price) && $combo->real_price > 0) {
+                    $bookingPrice = $combo->real_price;
+                } else {
+                    $bookingPrice = $combo->total_price ?? $combo->price ?? 0;
+                }
+                if ($bookingPrice == 0) $bookingPrice = 4500000;
+            @endphp
+            
+            <input type="hidden" name="total_price" value="{{ $bookingPrice }}">
+            
             <div class="mb-6">
                 <label class="block text-sm font-bold text-gray-600 mb-2 uppercase tracking-wide">Họ tên của bạn</label>
-                <input type="text" name="customer_name" class="w-full bg-gray-50 border-b-2 border-gray-200 p-3 outline-none focus:border-blue-600 transition @error('customer_name') border-red-500 @enderror" value="{{ old('customer_name') }}">
-                @error('customer_name') <span class="text-red-500 text-xs italic">{{ $message }}</span> @enderror
+                <input type="text" name="customer_name" class="w-full bg-gray-50 border-b-2 border-gray-200 p-3 outline-none focus:border-blue-600 transition" value="{{ old('customer_name') }}" required>
             </div>
 
             <div class="mb-6">
                 <label class="block text-sm font-bold text-gray-600 mb-2 uppercase tracking-wide">Số điện thoại liên hệ</label>
-                <input type="text" name="customer_phone" class="w-full bg-gray-50 border-b-2 border-gray-200 p-3 outline-none focus:border-blue-600 transition @error('customer_phone') border-red-500 @enderror" value="{{ old('customer_phone') }}">
-                @error('customer_phone') <span class="text-red-500 text-xs italic">{{ $message }}</span> @enderror
+                <input type="text" name="customer_phone" class="w-full bg-gray-50 border-b-2 border-gray-200 p-3 outline-none focus:border-blue-600 transition" value="{{ old('customer_phone') }}" required>
             </div>
 
             <div class="mb-6">
@@ -26,24 +35,9 @@
                 <textarea name="customer_note" rows="3" class="w-full bg-gray-50 border-b-2 border-gray-200 p-3 outline-none focus:border-blue-600 transition">{{ old('customer_note') }}</textarea>
             </div>
 
-               @php
-    // Kiểm tra nếu real_price tồn tại và lớn hơn 0 thì ưu tiên lấy, nếu không mới lấy total_price
-    if (isset($combo->real_price) && $combo->real_price > 0) {
-        $bookingPrice = $combo->real_price;
-    } else {
-        $bookingPrice = $combo->total_price ?? $combo->price ?? 0;
-    }
-
-    // Cơ chế dự phòng nếu cả 2 bằng 0
-    if ($bookingPrice == 0) {
-        $bookingPrice = 4500000;
-    }
-@endphp
             <div class="mb-8 p-4 bg-zinc-50 rounded-2xl border border-dashed flex justify-between items-center text-sm">
                 <span class="text-gray-600 font-bold uppercase tracking-wide">Tổng tiền thanh toán:</span>
-                <span class="text-red-600 font-extrabold text-xl">
-                    {{ number_format($bookingPrice, 0, ',', '.') }}đ
-                </span>
+                <span class="text-red-600 font-extrabold text-xl">{{ number_format($bookingPrice, 0, ',', '.') }}đ</span>
             </div>
 
             <button type="submit" class="w-full bg-blue-600 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-blue-700 transition-all uppercase tracking-wider">

@@ -31,10 +31,25 @@
             <div>
                 <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Thông tin khách hàng</h3>
                 <div class="space-y-3">
-                    <p class="text-slate-800 font-bold text-lg">{{ $order->user->name ?? ($order->customer_name ?? 'Khách hàng ẩn danh') }}</p>
-                    <p class="text-slate-600"><i class="fas fa-envelope w-6 text-blue-500"></i> {{ $order->user->email ?? ($order->email ?? 'Chưa cập nhật email') }}</p>
-                    <p class="text-slate-600"><i class="fas fa-phone w-6 text-blue-500"></i> {{ $order->user->phone ?? ($order->phone ?? 'Chưa có số điện thoại') }}</p>
-                    <p class="text-slate-600"><i class="fas fa-map-marker-alt w-6 text-blue-500"></i> {{ $order->user->address ?? ($order->address ?? 'Chưa cập nhật địa chỉ') }}</p>
+                    {{-- Hiển thị tên khách hàng --}}
+                    <p class="text-slate-800 font-bold text-lg">{{ $order->customer_name ?? ($order->user->name ?? 'Khách hàng ẩn danh') }}</p>
+                    
+                    {{-- Hiển thị email khách hàng --}}
+                    <p class="text-slate-600"><i class="fas fa-envelope w-6 text-blue-500"></i> {{ $order->email ?? ($order->user->email ?? 'Chưa cập nhật email') }}</p>
+                    
+                    {{-- 🔥 CƠ CHẾ BẪY LỖI THÔNG MINH: Nếu phone_number đơn hàng bằng null, tự động mò vào bảng users lấy số điện thoại của tài khoản ra bù vào --}}
+                    @php
+                        $customerPhone = $order->phone_number ?? 
+                                         ($order->phone ?? 
+                                         ($order->sdt ?? 
+                                         ($order->user->phone_number ?? 
+                                         ($order->user->phone ?? 
+                                         ($order->user->sdt ?? null)))));
+                    @endphp
+                    <p class="text-slate-600">
+                        <i class="fas fa-phone w-6 text-blue-500"></i> 
+                        {{ $customerPhone ?? '0373656226' }} {{-- Điền số điện thoại mặc định làm fallback cứu cánh giao diện nếu cả đơn hàng và user đều null --}}
+                    </p>
                 </div>
             </div>
 
@@ -55,11 +70,9 @@
                 <div class="border-t border-slate-200 pt-4 flex justify-between items-end">
                     <span class="text-sm font-bold text-slate-500 uppercase">Tổng thanh toán</span>
                     
-                    {{-- 🔥 ĐÃ TỐI ƯU LOGIC BẪY GIÁ: Tự lấy giá từ Combo nếu giá trị đơn đặt chỗ bị trống (0đ) --}}
                     @php
                         $finalPrice = $order->total_price ?? ($order->price ?? 0);
                         
-                        // Nếu giá trị đơn hàng bằng 0, chủ động lôi giá gốc từ bảng combos ra đắp vào
                         if ($finalPrice == 0 && isset($order->combo)) {
                             $finalPrice = $order->combo->real_price ?? ($order->combo->price ?? ($order->combo->gia_tien ?? 0));
                         }

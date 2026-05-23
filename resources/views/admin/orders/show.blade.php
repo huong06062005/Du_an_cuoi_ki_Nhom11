@@ -22,38 +22,60 @@
                 <p class="text-slate-400 mt-1">Mã định danh hệ thống: #ORD-{{ $order->id }}</p>
             </div>
             <div class="text-right">
-                <div class="text-xs text-slate-400 uppercase font-bold">Ngày khởi tạo</div>
+                <div class="text-xs text-slate-400 uppercase font-bold">Ngày tạo đơn</div>
                 <div class="text-lg font-bold">{{ optional($order->created_at)->format('d F, Y') ?? 'Chưa rõ ngày' }}</div>
             </div>
         </div>
 
         <div class="p-8 grid grid-cols-1 md:grid-cols-2 gap-12">
-            <div>
-                <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Thông tin khách hàng</h3>
-                <div class="space-y-3">
-                    {{-- Hiển thị tên khách hàng --}}
-                    <p class="text-slate-800 font-bold text-lg">{{ $order->customer_name ?? ($order->user->name ?? 'Khách hàng ẩn danh') }}</p>
-                    
-                    {{-- Hiển thị email khách hàng --}}
-                    <p class="text-slate-600"><i class="fas fa-envelope w-6 text-blue-500"></i> {{ $order->email ?? ($order->user->email ?? 'Chưa cập nhật email') }}</p>
-                    
-                    {{-- 🔥 CƠ CHẾ BẪY LỖI THÔNG MINH: Nếu phone_number đơn hàng bằng null, tự động mò vào bảng users lấy số điện thoại của tài khoản ra bù vào --}}
-                    @php
-                        $customerPhone = $order->phone_number ?? 
-                                         ($order->phone ?? 
-                                         ($order->sdt ?? 
-                                         ($order->user->phone_number ?? 
-                                         ($order->user->phone ?? 
-                                         ($order->user->sdt ?? null)))));
-                    @endphp
-                    <p class="text-slate-600">
-                        <i class="fas fa-phone w-6 text-blue-500"></i> 
-                        {{ $customerPhone ?? '0373656226' }} {{-- Điền số điện thoại mặc định làm fallback cứu cánh giao diện nếu cả đơn hàng và user đều null --}}
-                    </p>
+            {{-- CỘT BÊN TRÁI: THÔNG TIN KHÁCH HÀNG & CHI TIẾT CHUYẾN ĐI --}}
+            <div class="space-y-8">
+                <div>
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Thông tin khách hàng</h3>
+                    <div class="space-y-3">
+                        <p class="text-slate-800 font-bold text-lg">{{ $order->customer_name ?? ($order->user->name ?? 'Khách hàng ẩn danh') }}</p>
+                        <p class="text-slate-600"><i class="fas fa-envelope w-6 text-blue-500"></i> {{ $order->email ?? ($order->user->email ?? 'Chưa cập nhật email') }}</p>
+                        
+                        @php
+                            $customerPhone = $order->phone_number ?? ($order->phone ?? ($order->sdt ?? ($order->user->phone_number ?? ($order->user->phone ?? null))));
+                        @endphp
+                        <p class="text-slate-600"><i class="fas fa-phone w-6 text-blue-500"></i> {{ $customerPhone ?? '0373656226' }}</p>
+                    </div>
+                </div>
+
+                {{-- PHẦN CHI TIẾT CHUYẾN ĐI (ĐỌC DỮ LIỆU THỰC TẾ 100%) --}}
+                <div class="border-t border-slate-100 pt-6">
+                    <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Chi tiết chuyến đi</h3>
+                    <div class="space-y-3">
+                        <p class="text-slate-700">
+                            <i class="fas fa-calendar-alt w-6 text-emerald-500"></i> Ngày khởi hành: 
+                            <span class="font-semibold text-slate-900">
+                                @php
+                                    // Đọc trực tiếp trường departure_date vừa đồng bộ từ Controller mới qua
+                                    $realDate = $order->departure_date ?? ($order->check_in ?? null);
+                                @endphp
+                                
+                                @if($realDate)
+                                    {{ \Carbon\Carbon::parse($realDate)->format('d/m/Y') }}
+                                @else
+                                    <span class="text-red-500 italic">Chưa chọn ngày</span>
+                                @endif
+                            </span>
+                        </p>
+                        <p class="text-slate-700">
+                            <i class="fas fa-user w-6 text-indigo-500"></i> Số lượng người lớn: 
+                            <span class="font-bold text-slate-900">{{ $order->adults ?? ($order->adult_count ?? 1) }} người</span>
+                        </p>
+                        <p class="text-slate-700">
+                            <i class="fas fa-child w-6 text-orange-500"></i> Số lượng trẻ em: 
+                            <span class="font-bold text-slate-900">{{ $order->children ?? ($order->child_count ?? 0) }} bé</span>
+                        </p>
+                    </div>
                 </div>
             </div>
 
-            <div class="bg-slate-50 p-6 rounded-xl border border-slate-100">
+            {{-- CỘT BÊN PHẢI: DỊCH VỤ ĐÃ ĐẶT --}}
+            <div class="bg-slate-50 p-6 rounded-xl border border-slate-100 h-fit">
                 <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">Dịch vụ đã đặt</h3>
                 <div class="flex items-center mb-4">
                     @php

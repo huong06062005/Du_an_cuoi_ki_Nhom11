@@ -24,40 +24,36 @@ class BookingController extends Controller
      */
     public function store(Request $request)
     {
-        // 1. Validation cho các trường mới
+        // 1. Validation giữ nguyên để kiểm tra tính hợp lệ từ giao diện
         $request->validate([
-            'combo_id'    => 'required|exists:combos,id',
+            'combo_id'      => 'required|exists:combos,id',
             'customer_name' => 'required|string|max:255',
-            'email'       => 'required|email',
-            'phone'       => 'required|string|max:20',
-            'adult_count' => 'required|integer|min:1',
-            'child_count' => 'required|integer|min:0',
-            'check_in'    => 'required|date',
-            'note'        => 'nullable|string',
+            'email'         => 'required|email',
+            'phone'         => 'required|string|max:20',
+            'adult_count'   => 'required|integer|min:1',
+            'child_count'   => 'required|integer|min:0',
+            'check_in'      => 'required|date',
+            'note'          => 'nullable|string',
         ]);
 
         $combo = Combo::findOrFail($request->combo_id);
 
-        // 2. Tính toán giá (Backend xử lý lại để đảm bảo bảo mật)
-        // Lấy giá gốc từ combo (ưu tiên real_price)
+        // 2. Tính toán tổng tiền
         $pricePerAdult = $combo->real_price > 0 ? $combo->real_price : ($combo->total_price ?? $combo->price ?? 4500000);
         $pricePerChild = $pricePerAdult * 0.7;
 
         $totalPrice = ($request->adult_count * $pricePerAdult) + ($request->child_count * $pricePerChild);
 
-        // 3. Lưu vào Database
+        // 3. 🔥 ĐA SỬA: Chỉ lưu đúng những cột thực tế bảng bookings của em đang có trong Database
         Booking::create([
-            'user_id'       => Auth::id(), 
-            'combo_id'      => $combo->id,
-            'customer_name' => $request->customer_name,
-            'email'         => $request->email,
-            'phone'         => $request->phone,
-            'adult_count'   => $request->adult_count,
-            'child_count'   => $request->child_count,
-            'check_in'      => $request->check_in,
-            'note'          => $request->note,
-            'total_price'   => $totalPrice, 
-            'status'        => 'pending', 
+            'user_id'        => Auth::id(), // Hệ thống tự map thông tin Tên, Email qua ID này
+            'combo_id'       => $combo->id,
+            'adults'         => $request->adult_count,
+            'children'       => $request->child_count,
+            'departure_date' => $request->check_in,
+            'total_price'    => $totalPrice, 
+            'status'         => 'pending', 
+            'note'           => $request->note,
         ]);
 
         return redirect()->route('booking.history')

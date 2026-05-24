@@ -13,7 +13,7 @@ use App\Http\Controllers\ContactController;
 
 /*
 |--------------------------------------------------------------------------
-| 1. NHÓM PUBLIC
+| 1. NHOM PUBLIC (AI CŨNG TRUY CẬP ĐƯỢC)
 |--------------------------------------------------------------------------
 */
 Route::get('/', [HomeController::class, 'index'])->name('home');
@@ -34,7 +34,7 @@ Route::controller(AuthController::class)->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| 2. NHÓM CLIENT
+| 2. NHÓM CLIENT (BẮT BUỘC ĐĂNG NHẬP)
 |--------------------------------------------------------------------------
 */
 Route::middleware(['auth'])->group(function () {
@@ -45,7 +45,7 @@ Route::middleware(['auth'])->group(function () {
 
 /*
 |--------------------------------------------------------------------------
-| 3. NHÓM ADMIN
+| 3. NHÓM ADMIN (QUẢN TRỊ HỆ THỐNG)
 |--------------------------------------------------------------------------
 */
 Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () {
@@ -54,11 +54,14 @@ Route::prefix('admin')->name('admin.')->middleware(['auth'])->group(function () 
     Route::resource('services', ServiceController::class); 
     Route::resource('combos', ComboManageController::class);
 
+    // QUẢN LÝ ĐƠN HÀNG (BOOKINGS / ORDERS)
     Route::get('/orders', [BookingManageController::class, 'index'])->name('orders.index');
     Route::get('/bookings', [BookingManageController::class, 'index'])->name('bookings.index');
-    Route::patch('/orders/{id}/status', [BookingManageController::class, 'updateStatus'])->name('orders.update');
     
-    // ĐÃ THÊM: Tuyến đường xem chi tiết đơn đặt tour tách biệt sạch lỗi 500
+    // 🔥 ĐÃ ĐỒNG BỘ: Đổi chú thích chuẩn PHP để sạch lỗi ParseError
+    Route::patch('/orders/{id}', [BookingManageController::class, 'updateStatus'])->name('orders.update');
+    
+    // Tuyến đường xem chi tiết đơn đặt tour tách biệt sạch lỗi 500
     Route::get('/orders/{id}', [BookingManageController::class, 'show'])->name('orders.show');
 
     Route::get('/users', [AdminController::class, 'users'])->name('users.index');

@@ -8,6 +8,7 @@ use App\Models\User;
 use App\Models\Combo;
 use App\Models\Booking;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
 
 class AdminController extends Controller
 {
@@ -17,20 +18,19 @@ class AdminController extends Controller
         $totalCombos   = Combo::count();
         $totalBookings = Booking::count();
 
-        // 2. 🔥 ĐÃ TỐI ƯU: Tính doanh thu thông minh, bẫy lỗi cột tiền bằng 0 và tự động lấy giá gốc của Combo
+        // 2. 🔥 ĐA TỐI ƯU DOANH THU: Loại bỏ các đơn hàng đã bị HỦY (cancelled) ra khỏi doanh thu hệ thống
         $totalRevenue = 0;
         if (Schema::hasTable('bookings')) {
             // Xác định tên cột tiền hiện tại của bảng bookings
             $priceColumn = '';
-            foreach (['gia_tien', 'total_price', 'price'] as $col) {
+            foreach (['total_price', 'price', 'gia_tien'] as $col) {
                 if (Schema::hasColumn('bookings', $col)) {
                     $priceColumn = $col;
                     break;
                 }
             }
 
-            // Lấy tất cả đơn hàng (Tính cho cả trạng thái confirmed và pending để hiển thị chính xác)
-            // Đồng thời eager load quan hệ 'combo' để lôi giá gốc nếu cần
+            // 🎯 CHỈ LẤY những đơn Đã xác nhận (confirmed) hoặc Đang chờ duyệt (pending) để tính doanh thu
             $bookings = Booking::with('combo')
                 ->whereIn('status', ['confirmed', 'pending']) 
                 ->get();
@@ -39,7 +39,7 @@ class AdminController extends Controller
                 // Thử lấy giá lưu ở bảng booking trước
                 $currentPrice = $priceColumn ? ($booking->$priceColumn ?? 0) : 0;
 
-                // 💡 BẪY LỖI THẦN THÁNH: Nếu giá trị bằng 0, chủ động lôi giá từ bảng combo đắp vào tính toán
+                // BẪY LỖI: Nếu giá trị bằng 0, chủ động lôi giá từ bảng combo đắp vào tính toán
                 if ($currentPrice == 0 && isset($booking->combo)) {
                     $currentPrice = $booking->combo->real_price ?? ($booking->combo->price ?? ($booking->combo->gia_tien ?? 0));
                 }
@@ -55,7 +55,7 @@ class AdminController extends Controller
                       : User::count();
 
         // 4. Thống kê phần trăm trạng thái đơn hàng (Tối ưu hóa chỉ với 1 query)
-        $statusCounts = Booking::select('status', \DB::raw('count(*) as total'))
+        $statusCounts = Booking::select('status', DB::raw('count(*) as total'))
             ->groupBy('status')
             ->pluck('total', 'status');
 

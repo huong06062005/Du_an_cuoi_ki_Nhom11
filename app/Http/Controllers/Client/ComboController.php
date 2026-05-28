@@ -35,10 +35,6 @@ if ($request->filled('price_range')) {
     }
 }
 
-        if ($request->filled('category')) {
-            $category = $request->category;
-            $query->where('description', 'LIKE', '%' . $category . '%');
-        }
 
         $combos = $query->latest()->get();
         return view('client.combos.index', compact('combos'));

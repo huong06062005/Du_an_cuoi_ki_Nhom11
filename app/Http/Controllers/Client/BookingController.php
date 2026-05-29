@@ -72,4 +72,26 @@ class BookingController extends Controller
 
         return view('client.bookings.history', compact('bookings'));
     }
+    /**
+     * Xử lý khách hàng tự hủy đặt combo khi trạng thái vẫn đang là 'pending'
+     */
+    public function cancel($id)
+    {
+        // Chỉ tìm đơn đặt thuộc về chính người đang đăng nhập
+        $booking = Booking::where('id', $id)
+            ->where('user_id', Auth::id())
+            ->firstOrFail();
+
+        // Chỉ cho phép hủy khi trạng thái đơn là chờ duyệt (pending)
+        if ($booking->status !== 'pending') {
+            return redirect()->back()->with('error', 'Không thể hủy đơn đặt này vì đã được ban quản trị phê duyệt hoặc xử lý từ trước.');
+        }
+
+        // Cập nhật trạng thái thành 'cancelled' (Đã hủy)
+        $booking->update([
+            'status' => 'cancelled'
+        ]);
+
+        return redirect()->back()->with('success', 'Hủy yêu cầu đặt combo #' . sprintf('%05d', $booking->id) . ' thành công.');
+    }
 }

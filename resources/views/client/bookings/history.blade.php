@@ -7,6 +7,18 @@
         <h2 class="text-3xl font-bold">Lịch Sử Đặt Tour Của Bạn</h2>
     </div>
 
+    {{-- Khối hiển thị thông báo kết quả sau khi bấm Hủy đơn --}}
+    @if(session('success'))
+        <div class="mb-6 p-4 bg-green-100 border border-green-400 text-green-700 rounded-xl font-bold text-sm">
+            ✅ {{ session('success') }}
+        </div>
+    @endif
+    @if(session('error'))
+        <div class="mb-6 p-4 bg-red-100 border border-red-400 text-red-700 rounded-xl font-bold text-sm">
+            ❌ {{ session('error') }}
+        </div>
+    @endif
+
     <div class="bg-white rounded-2xl shadow-sm border overflow-hidden">
         <table class="w-full text-left">
             <thead class="bg-gray-50 border-b">
@@ -16,6 +28,7 @@
                     <th class="p-5 font-bold text-gray-500 uppercase text-xs">Ngày Đặt</th>
                     <th class="p-5 font-bold text-gray-500 uppercase text-xs text-center">Trạng Thái</th>
                     <th class="p-5 font-bold text-gray-500 uppercase text-xs text-right">Thành Tiền</th>
+                    <th class="p-5 font-bold text-gray-500 uppercase text-xs text-center">Thao Tác</th>
                 </tr>
             </thead>
             <tbody>
@@ -76,11 +89,26 @@
                         @endphp
                         {{ number_format($bookingPrice, 0, ',', '.') }}đ
                     </td>
+
+                    {{-- CỘT THAO TÁC HỦY ĐƠN ĐÃ ĐƯỢC ĐƯA VÀO ĐÚNG VỊ TRÍ TRONG VÒNG LẶP --}}
+                    <td class="p-5 text-center">
+                        @if($booking->status === 'pending') 
+                            <form action="{{ route('bookings.cancel', $booking->id) }}" method="POST" class="inline-block" onsubmit="return confirm('Bạn có chắc chắn muốn hủy đơn đặt combo này không?')">
+                                @csrf
+                                <button type="submit" class="bg-red-100 hover:bg-red-200 text-red-600 font-bold text-xs px-3 py-1.5 rounded-lg transition cursor-pointer">
+                                    Hủy đơn
+                                </button>
+                            </form>
+                        @else
+                            {{-- Nếu trạng thái không phải pending (đã duyệt hoặc đã hủy rồi) thì hiện chữ thông báo --}}
+                            <span class="text-gray-400 text-xs italic">Không thể can thiệp</span>
+                        @endif
+                    </td>
                 </tr>
                 @empty
                 {{-- Hiển thị cái này nếu danh sách lịch sử trống trơn --}}
                 <tr>
-                    <td colspan="5" class="p-10 text-center text-gray-400">
+                    <td colspan="6" class="p-10 text-center text-gray-400">
                         Bạn chưa đặt gói combo nào cả. 
                         <a href="/" class="text-blue-600 font-bold hover:underline ml-1">Đặt ngay?</a>
                     </td>

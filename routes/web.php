@@ -41,6 +41,7 @@ Route::middleware(['auth'])->group(function () {
     Route::get('/booking/{combo_id}', [BookingController::class, 'create'])->name('booking.create');
     Route::post('/booking/store', [BookingController::class, 'store'])->name('booking.store');
     Route::get('/my-bookings', [BookingController::class, 'history'])->name('booking.history');
+     Route::post('/booking/{id}/cancel', [BookingController::class, 'cancel'])->name('bookings.cancel');
 });
 
 /*
